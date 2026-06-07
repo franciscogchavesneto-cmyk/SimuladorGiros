@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang<head><html lang="pt-br">
+<html lang="pt-br">
+<head>
 <meta charset="UTF-8">
 <title>Simulador Giros - F3421879</title>
 
@@ -43,6 +44,18 @@ input, select { margin:4px 0; padding:10px 12px; border:1px solid #ccd4de; borde
     align-items:center;
     gap:10px;
 }
+
+#tipoField { grid-column: 1; grid-row: 3; }
+#taxasCdiContainer { grid-column: 2; grid-row: 3; }
+#taxaPrefixadoContainer { grid-column: 2; grid-row: 3; }
+#sobretaxaContainer { grid-column: 3; grid-row: 3; }
+#seguroContainer { grid-column: 1; grid-row: 4; }
+#sociosContainer { grid-column: 2; grid-row: 4; }
+#descontoEcgContainer { grid-column: 1; grid-row: 5; }
+#iofDiarioContainer { grid-column: 2; grid-row: 5; }
+#iofAdicionalContainer { grid-column: 3; grid-row: 5; }
+#tipoTacContainer { grid-column: 1; grid-row: 6; }
+#tacManualContainer { grid-column: 2; grid-row: 6; }
 
 .field.full-width {
     grid-column: 1 / -1;
@@ -194,7 +207,7 @@ tbody tr:hover { background:#eef3fb; }
         <input id="prazo" type="number" value="18">
     </div>
 
-    <div class="field">
+    <div id="tipoField" class="field">
         <label for="tipo">Tipo</label>
         <select id="tipo">
             <option value="cdi">CDI+ST</option>
@@ -230,22 +243,22 @@ tbody tr:hover { background:#eef3fb; }
         <input id="socios" type="number" min="1" value="2">
     </div>
 
-    <div class="field">
+    <div id="descontoEcgContainer" class="field">
         <label for="descontoEcg">Desconto ECG (%)</label>
         <input id="descontoEcg" type="number" value="40" step="0.01">
     </div>
 
-    <div class="field">
+    <div id="iofDiarioContainer" class="field">
         <label for="iofDiario">IOF Diário (%)</label>
         <input id="iofDiario" type="number" value="0.0082" step="0.0001" min="0">
     </div>
 
-    <div class="field">
+    <div id="iofAdicionalContainer" class="field">
         <label for="iofAdicional">IOF Adicional (%)</label>
         <input id="iofAdicional" type="number" value="0.38" step="0.0001" min="0">
     </div>
 
-    <div class="field">
+    <div id="tipoTacContainer" class="field">
         <label for="tipoTac">TAC</label>
         <select id="tipoTac">
             <option value="automatico">Automatica</option>
@@ -253,7 +266,7 @@ tbody tr:hover { background:#eef3fb; }
         </select>
     </div>
 
-    <div id="tacManualContainer" class="field full-width" style="display:none">
+    <div id="tacManualContainer" class="field" style="display:none">
         <label for="tacManual">TAC Manual (R$)</label>
         <input id="tacManual" type="number" min="0" step="0.01">
     </div>
