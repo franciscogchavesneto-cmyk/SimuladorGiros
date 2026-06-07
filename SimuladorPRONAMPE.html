@@ -16,6 +16,7 @@ h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; lette
 .dados-card .field{ display:flex; flex-direction:column; align-items:flex-start; }
 .dados-card label{ display:block; width:auto; text-align:left; margin-bottom:6px; color:#4b607e; font-weight:600; }
 .dados-card input, .dados-card select{ padding:10px 12px 10px 40px; border-radius:8px; border:1px solid #d7e2ee; background:#fff; height:44px; box-shadow:none; max-width:100%; }
+.dados-card input[readonly]{ background:#eef3fa !important; border:1px solid #cbd8e7 !important; color:#5b6f89 !important; cursor:default !important; }
 .dados-card .field.full-width{ grid-column:1 / -1; display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; }
 .dados-card .field-inline{ display:flex; gap:12px; align-items:center; }
 .dados-card input{ background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%23d0e6f6'/></svg>"); background-repeat:no-repeat; background-position:12px center; }
@@ -724,7 +725,7 @@ function atualizarSocios(){
 }
 
 function voltar(){
-    window.location.href = 'simuladores.html';
+    window.location.href = '/';
 }
 
 function bindResultsResetListeners(){
