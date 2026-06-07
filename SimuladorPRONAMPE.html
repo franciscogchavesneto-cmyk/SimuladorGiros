@@ -598,7 +598,7 @@ function calcular(){
         ? "    ³Inclui valor da parcela do prestamista."
         : "";
 
-    const observacaoPrestamista = usarSeguro ? " e Prestamista" : "";
+    const observacaoPrestamista = usarSeguro ? " e Prestamista;" : ".";
 
     resumo.innerHTML = `
     <h3>Resumo</h3>
@@ -624,7 +624,7 @@ function calcular(){
 
     rodapeSimulacao.innerHTML = `
     ¹Valor depende da quantidade de dias úteis entre as datas bases;<br>
-    ²Inclui valores de IOF${observacaoPrestamista};<br>
+    ²Inclui valores de IOF${observacaoPrestamista}<br>
 ${textoLegendaParcela}</p>
 
     <h3>OBSERVAÇÕES</h3>
