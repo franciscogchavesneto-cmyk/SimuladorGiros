@@ -9,8 +9,8 @@
 h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; letter-spacing:0.02em; }
 
 /* Card: Dados da Empresa e da Operação */
-.dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
-.dados-card .card-title{ font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
+.table-card, .dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
+.card-title { font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
 .dados-card .card-title::before{ content:""; width:28px; height:28px; background:#eef6fb; display:inline-block; border-radius:6px; box-shadow:inset 0 0 0 1px #d8eaf6; }
 .dados-card .form-grid { gap:16px 20px; }
 .dados-card .field{ display:flex; flex-direction:column; align-items:flex-start; }
@@ -56,6 +56,14 @@ input, select { margin:4px 0; padding:10px 12px; border:1px solid #ccd4de; borde
 #iofAdicionalContainer { grid-column: 3; grid-row: 5; }
 #tipoTacContainer { grid-column: 1; grid-row: 6; }
 #tacManualContainer { grid-column: 2; grid-row: 6; }
+
+.dados-e-tabelas { display:grid; grid-template-columns: 1.6fr 1fr; gap:24px; align-items:start; }
+.tabelas-laterais { display:grid; gap:18px; }
+.table-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); }
+.mini-table { width:100%; border-collapse:collapse; margin-top:10px; }
+.mini-table th, .mini-table td { border:1px solid #d7dbe1; padding:10px; font-size:0.92rem; text-align:center; }
+.mini-table th { background:#003366; color:#fff; font-weight:700; }
+.mini-table td:first-child { width:60%; }
 
 .field.full-width {
     grid-column: 1 / -1;
@@ -133,8 +141,8 @@ tbody tr:hover { background:#eef3fb; }
     @page { size: A4 portrait; margin: 18mm 14mm 18mm 14mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); }}
     body { margin:0; background:#fff !important; color:#000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
-    /* hide only the operation data card and controls */
-    .dados-card, .button-row, label, input, select, button { display:none !important; }
+    /* hide only the operation data card, lateral tables and controls */
+    .dados-card, .tabelas-laterais, .table-card, .button-row, label, input, select, button { display:none !important; }
 
     /* keep the page container visible without forcing all children to block */
     .page-container { width:auto !important; max-width:100% !important; padding:0 !important; background:transparent !important; box-shadow:none !important; margin:0 auto !important; padding-top:20mm !important; padding-bottom:14mm !important; }
@@ -179,6 +187,7 @@ tbody tr:hover { background:#eef3fb; }
 
 <h1>Simulação BB Capital de Giro - PEAC FGI</h1>
 
+<div class="dados-e-tabelas">
 <section class="dados-card">
     <h2 class="card-title">Dados da Operação</h2>
     <div class="form-grid">
@@ -272,6 +281,34 @@ tbody tr:hover { background:#eef3fb; }
     </div>
     </div>
 </section>
+
+<div class="tabelas-laterais">
+    <section class="table-card">
+        <h2 class="card-title">Regras FBA Ano Anterior</h2>
+        <table class="mini-table">
+            <thead>
+                <tr><th>FBA</th><th>CARÊNCIA</th><th>PARCELAS</th><th>TOTAL</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>&lt; 1M</td><td>6</td><td>6 até 30</td><td>até 36</td></tr>
+                <tr><td>1M - 5M</td><td>6</td><td>6 até 42</td><td>até 48</td></tr>
+                <tr><td>5M - 15M</td><td>6</td><td>6 até 54</td><td>até 60</td></tr>
+                <tr><td>&gt; 15M</td><td>6 - 12</td><td>6 até 54</td><td>até 60</td></tr>
+            </tbody>
+        </table>
+    </section>
+    <section class="table-card">
+        <h2 class="card-title">Impacto Limite Cliente</h2>
+        <table class="mini-table">
+            <tbody id="impactoLimiteCliente">
+                <tr><td>Fundo de Aval</td><td>-</td></tr>
+                <tr><td>Fidejussória / Real</td><td>-</td></tr>
+                <tr><td>Total</td><td>-</td></tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+</div>
 
 <div class="button-row">
     <button id="btnCalcular" onclick="calcular()">Calcular</button>
@@ -697,6 +734,8 @@ if(tipoTacSelect.value === "manual" && isNaN(tacManual)){
     const textoTaxaMensalAtual = `${(taxaMensalAtual * 100).toFixed(2)}%`;
     const totalLiquido = valor - despesaLiberacao;
     const tipoDiasTaxa = tipo.value === "cdi" ? "dias úteis" : "dias corridos";
+    const periodoPrazo = diasTotaisOperacao > 420 ? "Longo Prazo" : "Curto Prazo";
+    atualizarImpactoLimite(valor, periodoPrazo);
     const itensDespesa = ["IOF, ECG"];
     if(usarSeguro){
         itensDespesa.push("Prestamista");
@@ -784,6 +823,7 @@ const parcelaHeader = document.getElementById("parcelaHeader");
 const tabela = document.getElementById("tabela");
 const resumo = document.getElementById("resumo");
 const rodapeSimulacao = document.getElementById("rodapeSimulacao");
+const impactoLimiteCliente = document.getElementById("impactoLimiteCliente");
 const btnPrint = document.getElementById("btnPrint");
 
 let resultadosValidos = false;
@@ -816,6 +856,17 @@ function atualizarTacManual(){
     const usarTacManual = tipoTacSelect.value === "manual";
     tacManualContainer.style.display = usarTacManual ? "block" : "none";
     tacManualInput.disabled = !usarTacManual;
+}
+
+function atualizarImpactoLimite(valorContratado, periodo){
+    const fundo = valorContratado * 0.8;
+    const fidejussoria = valorContratado * 0.2;
+    const total = valorContratado;
+    impactoLimiteCliente.innerHTML = `
+        <tr><td>Fundo de Aval ${periodo}</td><td>${formatReal(fundo)}</td></tr>
+        <tr><td>Fidejussória / Real ${periodo}</td><td>${formatReal(fidejussoria)}</td></tr>
+        <tr><td>Total ${periodo}</td><td>${formatReal(total)}</td></tr>
+    `;
 }
 
 // --- Navigation ---
