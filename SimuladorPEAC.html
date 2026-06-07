@@ -743,8 +743,7 @@ ${legendaParcela}</p>
     <p>O Valor apresentado para seguro prestamista é uma aproximação, podendo variar a depender da data de liberação e dia base das parcelas.</p>
     <p>As propostas de operações de crédito estão sujeitas a prévia análise e aprovação pelo Banco do Brasil.</p>
     `;
-    // marcar como limpo após calcular (considerado salvo/estável)
-    isDirty = false;
+    // marcar resultado como válido após calcular
     resultadosValidos = true;
     if(btnPrint) btnPrint.disabled = false;
 }
@@ -818,37 +817,19 @@ function atualizarTacManual(){
     tacManualInput.disabled = !usarTacManual;
 }
 
-// --- Unsaved changes tracking and navigation protection ---
-let isDirty = false;
-function marcarAlterado(){
-    isDirty = true;
-    resetarResultados();
-}
-
-function bindDirtyListeners(){
-    const containers = document.querySelectorAll('.dados-card input, .dados-card select');
-    containers.forEach(el => {
-        el.addEventListener('input', marcarAlterado);
-        el.addEventListener('change', marcarAlterado);
-    });
-}
-
+// --- Navigation ---
 function voltar(){
-    if(isDirty){
-        const ok = confirm('Existem alterações não salvas. Deseja realmente sair sem salvar?');
-        if(!ok) return;
-    }
     window.location.href = 'simuladores.html';
 }
 
-window.onbeforeunload = function(e){
-    if(isDirty){
-        e = e || window.event;
-        const msg = 'Existem alterações não salvas.';
-        if (e) e.returnValue = msg;
-        return msg;
-    }
-};
+// --- Input change listener to reset results ---
+function bindResultsResetListeners(){
+    const containers = document.querySelectorAll('.dados-card input, .dados-card select');
+    containers.forEach(el => {
+        el.addEventListener('input', resetarResultados);
+        el.addEventListener('change', resetarResultados);
+    });
+}
 
 
 const printDateSpan = document.getElementById("printDate");
@@ -863,7 +844,7 @@ tipo.addEventListener("change", atualizarTipoTaxa);
 seguroSelect.addEventListener("change", atualizarSocios);
 tipoTacSelect.addEventListener("change", atualizarTacManual);
 atualizarCabecalhoImpressao();
-bindDirtyListeners();
+bindResultsResetListeners();
 window.onbeforeprint = atualizarCabecalhoImpressao;
 if(btnPrint) btnPrint.disabled = true;
 atualizarTipoTaxa();
