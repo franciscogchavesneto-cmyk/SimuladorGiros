@@ -772,7 +772,7 @@ function calcular(){
 
     rodapeSimulacao.innerHTML = `
     ¹Valor depende da quantidade de dias corridos entre as datas bases;<br>
-    ²Inclui valores de IOF, Flat, Tarifa Abertura de Crédito (TAC)${usarSeguro ? " e Prestamista;" : "."}<br>
+    ²Inclui valores de ${iofFinanciado ? "" : "IOF, "}Flat, Tarifa Abertura de Crédito (TAC)${usarSeguro ? " e Prestamista;" : "."}<br>
 ${textoLegendaParcela}</p>
 
     <h3>OBSERVAÇÕES</h3>
