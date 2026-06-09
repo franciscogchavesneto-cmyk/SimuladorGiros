@@ -660,7 +660,7 @@ function calcular(){
         }
 
         // Seguro
-        let seguroAtual = (usarSeguro && i < prazo - 1) ? seguroParcela : 0;
+        let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
         parcelaTotal += seguroAtual;
 
         saldoDevedor -= capitalParcela;
