@@ -50,9 +50,8 @@ input[type="checkbox"] { width:18px; height:18px; padding:0; margin:auto; justif
 input, select { max-width:none; }
 
 @media (max-width: 760px) {
-    .form-grid { grid-template-columns: 1fr; gap:12px; }
-    .field { grid-template-columns: minmax(90px, 110px) 1fr; }
-    .field input[type="date"] { max-width:140px; min-width:120px; }
+    .form-grid { grid-template-columns: repeat(3, minmax(100px, 1fr)); gap:12px 12px; }
+    .field { grid-template-columns: minmax(80px, 1fr) 1fr; }
     label { width:auto; }
 }
 
