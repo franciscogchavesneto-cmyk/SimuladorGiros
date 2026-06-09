@@ -57,6 +57,7 @@ input, select { max-width:none; }
 #taxaPrefixadoContainer { grid-column: 2; grid-row: 3; }
 #seguroContainer { grid-column: 1; grid-row: 4; }
 #sociosContainer { grid-column: 2; grid-row: 4; }
+#tipoSeguroContainer { grid-column: 3; grid-row: 4; }
 #iofDiarioContainer { grid-column: 1; grid-row: 5; }
 #iofAdicionalContainer { grid-column: 2; grid-row: 5; }
 #iofFinanciadoContainer { grid-column: 3; grid-row: 5; }
@@ -219,6 +220,14 @@ tbody tr:hover { background:#eef3fb; }
         <input id="socios" type="number" min="1" value="1">
     </div>
 
+    <div id="tipoSeguroContainer" class="field" style="display:none">
+        <label for="tipoSeguro">Tipo Seguro</label>
+        <select id="tipoSeguro">
+            <option value="parcelado">Parcelado</option>
+            <option value="integral">Integral</option>
+        </select>
+    </div>
+
     <div id="iofDiarioContainer" class="field">
         <label for="iofDiario">IOF Diário (%)</label>
         <input id="iofDiario" type="number" value="0.0082" step="0.0001" min="0">
@@ -319,7 +328,7 @@ tbody tr:hover { background:#eef3fb; }
 <table>
 <thead>
 <tr>
-<th>Posição</th><th>Data</th><th>Capital</th><th>Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
+<th>Posição</th><th>Data</th><th>Capital</th><th id="jurosHeader">Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
@@ -495,6 +504,7 @@ function calcular(){
     let sistema = sistemaSelect.value;
     let taxaMensal = parseFloat(preInput.value) / 100;
     let iofFinanciado = iofFinanciadoSelect.value === "true";
+    let seguroIntegral = usarSeguro && tipoSeguroSelect.value === "integral";
     let d0 = parseDateLocal(dataLiberacaoInput.value);
 
     if(!valor || !prazo || !d0 || isNaN(d0.getTime())){
@@ -595,7 +605,7 @@ function calcular(){
         totalSeguroValor = numSocios * taxaSeguroOp * valor;
     }
     let numParcelasSeguro = prazo - 1;
-    let seguroParcela = numParcelasSeguro > 0 ? totalSeguroValor / numParcelasSeguro : 0;
+    let seguroParcela = (usarSeguro && !seguroIntegral && numParcelasSeguro > 0) ? totalSeguroValor / numParcelasSeguro : 0;
 
     if(sistema === "sac" && iofFinanciado){
         for(let iter = 0; iter < 50; iter++){
@@ -711,7 +721,7 @@ function calcular(){
         }
 
         // Seguro
-        let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
+        let seguroAtual = (usarSeguro && !seguroIntegral && i < prazo - 2) ? seguroParcela : 0;
         parcelaTotal += seguroAtual;
 
         if(i === 0 && iofFinanciado && sistema === "sac"){
@@ -745,7 +755,8 @@ function calcular(){
     }
 
     const totalIoFTotal = totalIofDiario + iofAdicionalTotal;
-    let despesaLiberacao = (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + (usarSeguro ? seguroParcela : 0) + tac + comissaoFlat;
+    let despesaSeguro = usarSeguro ? (seguroIntegral ? totalSeguroValor : seguroParcela) : 0;
+    let despesaLiberacao = (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + despesaSeguro + tac + comissaoFlat;
     let totalFinal = totalPago + despesaLiberacao;
 
     const valorLiberado = valor - despesaLiberacao;
@@ -770,7 +781,7 @@ function calcular(){
         <div class="resumo-item"><span>Carência</span><span>${car}</span></div>
         <div class="resumo-item"><span>Prazo Total</span><span>${prazo}</span></div>
         <div class="resumo-item"><span>Seguro Total</span><span>${formatReal(totalSeguroValor)}</span></div>
-        <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroParcela)}</span></div>
+        <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroIntegral ? 0 : seguroParcela)}</span></div>
         <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIoFTotal)}</span></div>
         <div class="resumo-item"><span>TAC</span><span>${formatReal(tac)}</span></div>
         <div class="resumo-item"><span>Despesa Total²</span><span>${formatReal(despesaLiberacao)}</span></div>
@@ -820,6 +831,10 @@ const iofAdicionalInput = document.getElementById("iofAdicional");
 const iofFinanciadoSelect = document.getElementById("iofFinanciado");
 const seguroSelect = document.getElementById("seguro");
 const sociosInput = document.getElementById("socios");
+const sociosContainer = document.getElementById("sociosContainer");
+const tipoSeguroSelect = document.getElementById("tipoSeguro");
+const tipoSeguroContainer = document.getElementById("tipoSeguroContainer");
+const jurosHeader = document.getElementById("jurosHeader");
 const sistemaSelect = document.getElementById("sistema");
 const tipoTacSelect = document.getElementById("tipoTac");
 const tacManualInput = document.getElementById("tacManual");
@@ -854,10 +869,15 @@ function atualizarDataBase(){
     }
 }
 
-function atualizarSocios(){
+function atualizarSeguroOptions(){
     const usarSeguro = seguroSelect.value === "1";
     sociosContainer.style.display = usarSeguro ? "flex" : "none";
+    tipoSeguroContainer.style.display = usarSeguro ? "flex" : "none";
     parcelaHeader.textContent = usarSeguro ? "Parcela³" : "Parcela";
+}
+
+function atualizarJurosHeader(){
+    jurosHeader.textContent = iofFinanciadoSelect.value === "true" ? "Juros+IOF" : "Juros";
 }
 
 function atualizarTacManual(){
@@ -891,14 +911,17 @@ function atualizarCabecalhoImpressao(){
 inicializarDatas();
 atualizarDataBase();
 dataLiberacaoInput.addEventListener("input", () => { atualizarDataBase(); resetarResultados(); });
-seguroSelect.addEventListener("change", atualizarSocios);
+seguroSelect.addEventListener("change", () => { atualizarSeguroOptions(); resetarResultados(); });
+tipoSeguroSelect.addEventListener("change", resetarResultados);
+iofFinanciadoSelect.addEventListener("change", () => { atualizarJurosHeader(); resetarResultados(); });
 tipoTacSelect.addEventListener("change", atualizarTacManual);
 sistemaSelect.addEventListener("change", () => { atualizarIofFinanciado(); resetarResultados(); });
 atualizarCabecalhoImpressao();
 bindResultsResetListeners();
 window.onbeforeprint = atualizarCabecalhoImpressao;
 if(btnPrint) btnPrint.disabled = true;
-atualizarSocios();
+atualizarSeguroOptions();
+atualizarJurosHeader();
 atualizarTacManual();
 atualizarIofFinanciado();
 
