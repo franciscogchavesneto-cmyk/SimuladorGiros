@@ -7,6 +7,7 @@
 <style>
 .page-container { max-width:1080px; margin:0 auto; padding:24px 20px 40px; }
 h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; letter-spacing:0.02em; }
+@media print { h1 { font-size:1.5rem; } }
 
 .table-card, .dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
 .card-title { font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
@@ -41,6 +42,15 @@ input, select { margin:4px 0; padding:10px 12px; border:1px solid #ccd4de; borde
     grid-template-columns: 120px minmax(110px, 120px);
     align-items:center;
     gap:10px;
+}
+
+.field label { width:auto; }
+input, select { max-width:none; }
+
+@media (max-width: 760px) {
+    .form-grid { grid-template-columns: repeat(3, minmax(100px, 1fr)); gap:12px 12px; }
+    .field { grid-template-columns: minmax(80px, 1fr) 1fr; }
+    label { width:auto; }
 }
 
 #sistemaContainer { grid-column: 1; grid-row: 3; }
@@ -134,6 +144,7 @@ tbody tr:hover { background:#eef3fb; }
     th { background:#003366 !important; color:#fff !important; }
     tbody tr:nth-child(odd) { background:#fff !important; }
     tbody tr:hover { background:transparent !important; }
+    .carencia-row td { background:#e7f1ff !important; }
     tr { page-break-inside:avoid; page-break-after:auto; }
     thead { display:table-header-group; }
     tfoot { display:table-footer-group; }
@@ -723,7 +734,7 @@ function calcular(){
         totalPago += parcelaTotal;
 
         tabela.innerHTML += `
-        <tr>
+        <tr ${i+1 <= car ? 'class="carencia-row"' : ''}>
         <td>${i+1}</td>
         <td>${data.toLocaleDateString()}</td>
         <td>${formatReal(capitalParcela)}</td>
@@ -735,7 +746,7 @@ function calcular(){
 
     const totalIoFTotal = totalIofDiario + iofAdicionalTotal;
     let despesaLiberacao = (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + (usarSeguro ? seguroParcela : 0) + tac + comissaoFlat;
-    let totalFinal = totalPago + (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + tac + comissaoFlat;
+    let totalFinal = totalPago + despesaLiberacao;
 
     const valorLiberado = valor - despesaLiberacao;
     const cetAnual = calcularCetAnual(valorLiberado, fluxosParcelas);
@@ -752,7 +763,7 @@ function calcular(){
     <h3>Resumo</h3>
     <div class="resumo-grid">
         <div class="resumo-item"><span>Valor</span><span>${formatReal(valor)}</span></div>
-        <div class="resumo-item"><span>Taxa Mensal Fixa¹</span><span>${textoTaxaMensalAtual}</span></div>
+        <div class="resumo-item"><span>Taxa Mensal¹</span><span>${textoTaxaMensalAtual}</span></div>
         <div class="resumo-item"><span>Contratação</span><span>${formatDateBR(dataLiberacaoInput.value)}</span></div>
         <div class="resumo-item"><span>Data Base</span><span>${dataBaseInput.value}</span></div>
         <div class="resumo-item"><span>Sistema</span><span>${sistema.toUpperCase()}</span></div>
