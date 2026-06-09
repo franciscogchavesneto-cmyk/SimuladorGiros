@@ -308,7 +308,7 @@ tbody tr:hover { background:#eef3fb; }
 <table>
 <thead>
 <tr>
-<th>Posição</th><th>Data</th><th>Capital</th><th>Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th><th>Dias</th>
+<th>Posição</th><th>Data</th><th>Capital</th><th>Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
@@ -392,6 +392,35 @@ function diasCorridos(d1, d2){
     let a = cloneDate(d1);
     let b = cloneDate(d2);
     return Math.max(Math.floor((b-a)/(1000*60*60*24)),0);
+}
+
+function diasNoMes(ano, mes){
+    return new Date(ano, mes + 1, 0).getDate();
+}
+
+function computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, financedTotal, car, amortFinanceiro, d0){
+    let totalIof = 0;
+    let saldoIofCalc = valor + financedTotal;
+    let diasAcumuladosIofCalc = 0;
+    const iofShare = financedTotal / amortFinanceiro;
+
+    for(let i=0;i<datas.length;i++){
+        let data = datas[i];
+        let anterior = (i === 0) ? cloneDate(d0) : datas[i-1];
+        let dc = diasCorridos(anterior, data);
+        let principalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
+        let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIofCalc);
+        if(diasConsiderados > 0){
+            totalIof += saldoIofCalc * iofDiarioRate * diasConsiderados;
+            diasAcumuladosIofCalc += diasConsiderados;
+        }
+        if(i+1 > car){
+            saldoIofCalc -= principalParcela + iofShare;
+            if(saldoIofCalc < 0) saldoIofCalc = 0;
+        }
+    }
+
+    return totalIof;
 }
 
 function calcularCetAnual(valorLiberado, fluxos){
@@ -516,8 +545,10 @@ function calcular(){
     // IOF
     const iofDiarioRate = parseFloat(iofDiarioInput.value || 0.0082) / 100;
     const iofAdicionalRate = parseFloat(iofAdicionalInput.value || 0.38) / 100;
-    let totalIOF = valor * iofAdicionalRate;
-    let iofAdicionalTotal = totalIOF;
+    let totalIofDiario = 0;
+    let iofAdicionalTotal = valor * iofAdicionalRate;
+    let totalIOF = iofAdicionalTotal;
+    let totalIofFinanciado = 0;
     let diasAcumuladosIOF = 0;
 
     // Gerar datas das parcelas
@@ -555,63 +586,50 @@ function calcular(){
     let numParcelasSeguro = prazo - 1;
     let seguroParcela = numParcelasSeguro > 0 ? totalSeguroValor / numParcelasSeguro : 0;
 
-    atualizarImpactoLimite(valor, diasTotaisOp);
-
-    let iofFinanceiro = 0;
-    if(iofFinanciado && sistema === "sac"){
-        iofFinanceiro = totalIOF;
-        totalIOF = 0;
+    if(sistema === "sac" && iofFinanciado){
+        for(let iter = 0; iter < 50; iter++){
+            totalIofDiario = computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, totalIofFinanciado, car, amortFinanceiro, d0);
+            const nextTotalIofFinanciado = (totalIofDiario + valor * iofAdicionalRate) / (1 - iofAdicionalRate);
+            if(Math.abs(nextTotalIofFinanciado - totalIofFinanciado) < 0.01){
+                totalIofFinanciado = nextTotalIofFinanciado;
+                break;
+            }
+            totalIofFinanciado = nextTotalIofFinanciado;
+        }
+        totalIofDiario = Math.round(totalIofDiario * 100) / 100;
+        totalIofFinanciado = Math.round(totalIofFinanciado * 100) / 100;
+        iofAdicionalTotal = Math.round((totalIofFinanciado - totalIofDiario) * 100) / 100;
+        if(iofAdicionalTotal < 0) iofAdicionalTotal = 0;
+        totalIOF = iofAdicionalTotal;
     }
 
-    const usarPrincipalEstendido = (sistema === "sac" && firstMonthOffset === 2);
+    atualizarImpactoLimite(valor, diasTotaisOp);
 
-    // PRICE: pre-calcular juros de cada período de amortização (do último para o primeiro)
+    const iofFinanciadoShare = (iofFinanciado && sistema === "sac") ? (totalIofDiario + iofAdicionalTotal) / amortFinanceiro : 0;
+    const usarPrincipalEstendido = (sistema === "sac" && base < diasNoMes(d0.getFullYear(), d0.getMonth()));
+
+    // PRICE: pre-calcular juros de amortização seguindo o modelo da planilha
     let priceJurosReverso = [];
     let priceCapitalReverso = [];
     if(sistema === "price" && amortFinanceiro > 0){
-        // Simular saldo devedor para cada período de amortização (do primeiro ao último)
-        let saldoSim = valor;
-        let jurosNormais = [];
-        let capitaisNormais = [];
-        
-        // Primeiro calcula juros e capital para cada período na ordem direta
-        for(let idxAmort = 0; idxAmort < amortFinanceiro; idxAmort++){
-            // A data precisa ser a data da parcela correspondente (car + idxAmort)
-            let dataIdx = car + idxAmort;
-            let dt = datas[dataIdx];
-            let ant = (dataIdx === 0) ? cloneDate(d0) : datas[dataIdx - 1];
-            let dc = diasCorridos(ant, dt);
-            
-            // PRICE invertido: a última parcela (primeira na ordem direta) tem juros = V * i
-            let jurosP, capitalP;
-            if(idxAmort === 0){
-                // Primeira da ordem direta = última da ordem reversa
-                // Juros = valor contratado * taxa mensal fixa
-                jurosP = valor * taxaMensal * (dc / 30);
-                capitalP = parcelaPriceConst - jurosP;
-                if(capitalP < 0) capitalP = 0;
-                if(capitalP > saldoSim) capitalP = saldoSim;
-            } else {
-                jurosP = saldoSim * taxaMensal * (dc / 30);
-                capitalP = (idxAmort < amortFinanceiro - 1) ? parcelaPriceConst - jurosP : saldoSim;
-                if(capitalP < 0) capitalP = 0;
-            }
-            // Última da ordem direta = primeira da ordem reversa (ajuste final)
+        let futurePrincipalSum = 0;
+        for(let idxAmort = amortFinanceiro - 1; idxAmort >= 0; idxAmort--){
+            let jurosP;
             if(idxAmort === amortFinanceiro - 1){
-                capitalP = saldoSim;
-                jurosP = parcelaPriceConst - capitalP;
-                if(jurosP < 0) { jurosP = 0; capitalP = saldoSim; }
+                jurosP = valor * taxaMensal;
+            } else {
+                const saldoAntes = valor - futurePrincipalSum;
+                jurosP = saldoAntes * taxaMensal;
             }
-            jurosNormais.push(jurosP);
-            capitaisNormais.push(capitalP);
-            saldoSim -= capitalP;
-            if(saldoSim < 0.01) saldoSim = 0;
-        }
-        
-        // Inverte a ordem: último vira primeiro
-        for(let i = 0; i < amortFinanceiro; i++){
-            priceJurosReverso.push(jurosNormais[amortFinanceiro - 1 - i]);
-            priceCapitalReverso.push(capitaisNormais[amortFinanceiro - 1 - i]);
+            let capitalP = parcelaPriceConst - jurosP;
+            if(capitalP < 0) capitalP = 0;
+            if(idxAmort === amortFinanceiro - 1){
+                const restante = valor - futurePrincipalSum;
+                if(capitalP > restante) capitalP = restante;
+            }
+            priceJurosReverso[idxAmort] = jurosP;
+            priceCapitalReverso[idxAmort] = capitalP;
+            futurePrincipalSum += capitalP;
         }
     }
 
@@ -629,9 +647,30 @@ function calcular(){
         let jurosPeriodo, capitalParcela, parcelaTotal;
 
         if(sistema === "sac"){
-            jurosPeriodo = principalJuros * taxaMensal * (dc / 30);
-            capitalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
-            parcelaTotal = jurosPeriodo + capitalParcela;
+            if(i === 0 && usarPrincipalEstendido){
+                const condDataBaseMesSeguinte = base < diasNoMes(d0.getFullYear(), d0.getMonth());
+                let dtSplit;
+                if(condDataBaseMesSeguinte){
+                    dtSplit = new Date(d0.getFullYear(), d0.getMonth() + 1, base);
+                } else {
+                    dtSplit = new Date(d0.getFullYear(), d0.getMonth(), base);
+                }
+                let firstSegmentDays = diasCorridos(d0, dtSplit);
+                let secondSegmentDays = diasCorridos(dtSplit, data);
+                let baseAmount = saldoDevedor + ((iofFinanciado && sistema === "sac") ? (totalIofDiario + iofAdicionalTotal) : 0);
+                let jurosPrimeiro = baseAmount * taxaMensal * (firstSegmentDays / 30);
+                let jurosSegundo = (baseAmount + jurosPrimeiro) * taxaMensal * (secondSegmentDays / 30);
+                jurosPeriodo = jurosPrimeiro + jurosSegundo;
+                capitalParcela = 0;
+                parcelaTotal = jurosPeriodo;
+            } else {
+                jurosPeriodo = principalJuros * taxaMensal * (dc / 30);
+                if(iofFinanciado && i+1 > car){
+                    jurosPeriodo += iofFinanciadoShare;
+                }
+                capitalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
+                parcelaTotal = jurosPeriodo + capitalParcela;
+            }
         } else {
             // PRICE invertido: capital decrescente, juros crescente
             if(i+1 <= car){
@@ -654,6 +693,7 @@ function calcular(){
             if(diasConsiderados > 0){
                 iofPeriodo = saldoDevedor * iofDiarioRate * diasConsiderados;
                 iofPeriodo = Math.round(iofPeriodo * 100) / 100;
+                totalIofDiario += iofPeriodo;
                 totalIOF += iofPeriodo;
                 diasAcumuladosIOF += diasConsiderados;
             }
@@ -663,7 +703,15 @@ function calcular(){
         let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
         parcelaTotal += seguroAtual;
 
-        saldoDevedor -= capitalParcela;
+        if(i === 0 && iofFinanciado && sistema === "sac"){
+            saldoDevedor = valor + totalIofDiario + iofAdicionalTotal;
+        }
+
+        if(sistema === "sac" && iofFinanciado && i+1 > car){
+            saldoDevedor -= capitalParcela + iofFinanciadoShare;
+        } else {
+            saldoDevedor -= capitalParcela;
+        }
         if(saldoDevedor < 0.01) saldoDevedor = 0;
 
         fluxosParcelas.push({
@@ -682,12 +730,12 @@ function calcular(){
         <td>${formatReal(jurosPeriodo)}</td>
         <td>${formatReal(parcelaTotal)}</td>
         <td>${formatReal(saldoDevedor)}</td>
-        <td>${dc}</td>
         </tr>`;
     }
 
-    let despesaLiberacao = totalIOF + (usarSeguro ? seguroParcela : 0) + tac + comissaoFlat + iofFinanceiro;
-    let totalFinal = totalPago + totalIOF + tac + comissaoFlat;
+    const totalIoFTotal = totalIofDiario + iofAdicionalTotal;
+    let despesaLiberacao = (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + (usarSeguro ? seguroParcela : 0) + tac + comissaoFlat;
+    let totalFinal = totalPago + (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + tac + comissaoFlat;
 
     const valorLiberado = valor - despesaLiberacao;
     const cetAnual = calcularCetAnual(valorLiberado, fluxosParcelas);
@@ -712,7 +760,7 @@ function calcular(){
         <div class="resumo-item"><span>Prazo Total</span><span>${prazo}</span></div>
         <div class="resumo-item"><span>Seguro Total</span><span>${formatReal(totalSeguroValor)}</span></div>
         <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroParcela)}</span></div>
-        <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIOF)}</span></div>
+        <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIoFTotal)}</span></div>
         <div class="resumo-item"><span>TAC</span><span>${formatReal(tac)}</span></div>
         <div class="resumo-item"><span>Despesa Total²</span><span>${formatReal(despesaLiberacao)}</span></div>
         <div class="resumo-item"><span>CET Mensal</span><span>${textoCetMensal}</span></div>
