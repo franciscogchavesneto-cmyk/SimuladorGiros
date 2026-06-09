@@ -46,6 +46,7 @@ input, select { margin:4px 0; padding:10px 12px; border:1px solid #ccd4de; borde
 }
 
 .field label { width:auto; }
+input[type="checkbox"] { width:18px; height:18px; padding:0; margin:auto; justify-self:center; }
 input, select { max-width:none; }
 
 @media (max-width: 760px) {
@@ -224,10 +225,7 @@ tbody tr:hover { background:#eef3fb; }
 
     <div id="seguroContainer" class="field">
         <label for="seguro">Seguro</label>
-        <select id="seguro">
-            <option value="1">Sim</option>
-            <option value="0">Não</option>
-        </select>
+        <input type="checkbox" id="seguro" checked>
     </div>
 
     <div id="sociosContainer" class="field">
@@ -456,7 +454,7 @@ function calcular(){
     let prazo = parseInt(prazoInput.value);
     let car = parseInt(carenciaInput.value);
     let base = parseInt(dataBaseInput.value);
-    let usarSeguro = seguroSelect.value === "1";
+    let usarSeguro = seguroSelect.checked;
     let numSocios = parseInt(sociosInput.value) || 1;
     let d0 = parseDateLocal(dataLiberacaoInput.value);
 
@@ -737,7 +735,7 @@ function atualizarFbaDependencias(){
 }
 
 function atualizarSocios(){
-    const usarSeguro = seguroSelect.value === "1";
+    const usarSeguro = seguroSelect.checked;
     sociosContainer.style.display = usarSeguro ? "flex" : "none";
     parcelaHeader.textContent = usarSeguro ? "Parcela³" : "Parcela";
 }
