@@ -546,7 +546,7 @@ function calcular(){
         }
 
         let capitalParcela = (i+1 <= car) ? 0 : amort;
-        let seguroAtual = (usarSeguro && i < prazo - 1) ? seguroParcela : 0;
+        let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
         let parcelaTotal = jurosPeriodo + capitalParcela + seguroAtual;
 
         saldoDevedor -= capitalParcela;
