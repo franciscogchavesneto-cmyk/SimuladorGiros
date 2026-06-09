@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Simulador Giros - F3421879</title>
+
+<style>
+.page-container { max-width:1080px; margin:0 auto; padding:24px 20px 40px; }
+h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; letter-spacing:0.02em; }
+@media print { h1 { font-size:1.5rem; } }
+
+.table-card, .dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
+.card-title { font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
+.dados-card .card-title::before{ content:""; width:28px; height:28px; background:#eef6fb; display:inline-block; border-radius:6px; box-shadow:inset 0 0 0 1px #d8eaf6; }
+.dados-card .form-grid { gap:16px 20px; }
+.dados-card .field{ display:flex; flex-direction:column; align-items:flex-start; }
+.dados-card label{ display:block; width:auto; text-align:left; margin-bottom:6px; color:#4b607e; font-weight:600; }
+.dados-card input, .dados-card select{ padding:10px 12px 10px 40px; border-radius:8px; border:1px solid #d7e2ee; background:#fff; height:44px; box-shadow:none; max-width:100%; }
+.dados-card input[readonly]{ background:#eef3fa !important; border:1px solid #cbd8e7 !important; color:#5b6f89 !important; cursor:default !important; }
+.dados-card .field.full-width{ grid-column:1 / -1; display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; }
+.dados-card .field-inline{ display:flex; gap:12px; align-items:center; }
+.dados-card input{ background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%23d0e6f6'/></svg>"); background-repeat:no-repeat; background-position:12px center; }
+.dados-card select{ background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'><path fill='%23999' d='M7 10l5 5 5-5z'/></svg>"); background-repeat:no-repeat; background-position:12px center; background-size:12px; }
+
+body { font-family: Arial, sans-serif; margin:0; background:#f4f7fb; color:#23304f; }
+
+label { display:inline-block; width:120px; font-weight:600; color:#354156; text-align:right; }
+input, select { margin:4px 0; padding:10px 12px; border:1px solid #ccd4de; border-radius:10px; width:100%; max-width:120px; box-sizing:border-box; background:#fff; color:#1b2c42; }
+
+.form-grid {
+    max-width:1080px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap:18px 24px;
+    align-items:center;
+    justify-items:start;
+}
+
+.field {
+    display:grid;
+    grid-template-columns: 120px minmax(110px, 120px);
+    align-items:center;
+    gap:10px;
+}
+
+.field label { width:auto; }
+input, select { max-width:none; }
+
+@media (max-width: 760px) {
+    .form-grid { grid-template-columns: repeat(3, minmax(100px, 1fr)); gap:12px 12px; }
+    .field { grid-template-columns: minmax(80px, 1fr) 1fr; }
+    label { width:auto; }
+}
+
+#tipoContainer { grid-column: 1; grid-row: 3; }
+#taxasCdiContainer { grid-column: 2; grid-row: 3; }
+#sobretaxaContainer { grid-column: 3; grid-row: 3; }
+#percentualCdiContainer { grid-column: 3; grid-row: 3; }
+#seguroContainer { grid-column: 1; grid-row: 4; }
+#sociosContainer { grid-column: 2; grid-row: 4; }
+#iofDiarioContainer { grid-column: 1; grid-row: 5; }
+#iofAdicionalContainer { grid-column: 2; grid-row: 5; }
+#iofFinanciadoContainer { grid-column: 3; grid-row: 5; }
+#tipoTacContainer { grid-column: 1; grid-row: 6; }
+#tacManualContainer { grid-column: 2; grid-row: 6; }
+#flatUnidadeContainer { grid-column: 1; grid-row: 7; }
+#flatValorContainer { grid-column: 2; grid-row: 7; }
+
+.dados-e-tabelas { display:grid; grid-template-columns: 1.6fr 1fr; gap:24px; align-items:start; }
+.tabelas-laterais { display:grid; gap:18px; }
+.table-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); }
+.mini-table { width:100%; border-collapse:collapse; margin-top:10px; }
+.mini-table th, .mini-table td { border:1px solid #d7dbe1; padding:10px; font-size:0.92rem; text-align:center; white-space:nowrap; }
+.mini-table th { background:#003366; color:#fff; font-weight:700; }
+.obs-note { margin-top:10px; font-size:0.82rem; color:#5b6f89; line-height:1.4; }
+
+.field.full-width { grid-column: 1 / -1; display:grid; grid-template-columns: repeat(2, minmax(160px, 180px)); gap:18px 24px; justify-content:start; }
+.subfield { display:grid; grid-template-columns: 140px minmax(120px, 220px); align-items:center; gap:10px; }
+.field-inline { display:grid; grid-template-columns: 120px 1fr; align-items:center; gap:8px; }
+
+.button-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    margin:20px auto 0;
+    max-width:960px;
+}
+
+button {
+    padding:12px 18px;
+    background:#003366;
+    color:white;
+    border:none;
+    border-radius:10px;
+    min-width:140px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.08);
+    transition:transform .2s ease, background .2s ease;
+}
+
+button:hover {
+    transform:translateY(-1px);
+    background:#002952;
+}
+
+#resumo { margin:24px auto 0; max-width:1080px; background:#fff; border:1px solid #dce3eb; border-radius:16px; padding:22px; box-shadow:0 14px 34px rgba(0,0,0,0.06); font-size:14px; }
+#resumo h3 { margin-top:0; margin-bottom:20px; color:#003366; font-size:1.2rem; }
+.resumo-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+.resumo-item { background:#f7faff; padding:12px 14px; border-radius:14px; border:1px solid #e3ecf6; display:flex; justify-content:space-between; align-items:center; gap:12px; min-width:0; }
+.resumo-item span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.resumo-item span:first-child { color:#4b607e; font-size:0.88rem; line-height:1.4; }
+.resumo-item span:last-child { color:#102640; font-weight:700; text-align:right; font-size:0.95rem; }
+
+.print-header, .print-footer { display:none; }
+
+table { border-collapse:collapse; width:100%; margin-top:20px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 14px 34px rgba(0,0,0,0.04); font-size:13px; }
+th, td { border:1px solid #d7dbe1; padding:10px; text-align:center; }
+th { background:#003366; color:white; }
+tbody tr:nth-child(odd) { background:#fafbff; }
+tbody tr:hover { background:#eef3fb; }
+
+#rodapeSimulacao { max-width:1080px; margin:20px auto 0; padding:18px 20px; background:#fff; border:1px solid #dce3eb; border-radius:16px; color:#354156; line-height:1.5; box-shadow:0 14px 34px rgba(0,0,0,0.04); font-size:13px; }
+#rodapeSimulacao h3 { margin-top:0; color:#003366; }
+
+@media print {
+    @page { size: A4 portrait; margin: 18mm 14mm 18mm 14mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); }}
+    body { margin:0; background:#fff !important; color:#000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .dados-card, .tabelas-laterais, .table-card, .button-row, label, input, select, button { display:none !important; }
+    .page-container { width:auto !important; max-width:100% !important; padding:0 !important; background:transparent !important; box-shadow:none !important; margin:0 auto !important; padding-top:20mm !important; padding-bottom:14mm !important; }
+    .print-header { display:flex !important; justify-content:space-between !important; align-items:center !important; position:fixed !important; top:0 !important; left:0 !important; right:0 !important; width:100% !important; box-sizing:border-box !important; padding:3mm 14mm 1.5mm !important; font-size:8pt !important; color:#102640 !important; background:#fff !important; border-bottom:1px solid #dce3eb !important; z-index:9999 !important; }
+    .print-header-left, .print-header-right { display:inline-block !important; white-space:nowrap !important; }
+    .print-footer { display:flex !important; justify-content:flex-end !important; align-items:center !important; position:fixed !important; bottom:0 !important; left:0 !important; right:0 !important; width:100% !important; box-sizing:border-box !important; padding:1.5mm 14mm 3mm !important; font-size:8pt !important; color:#102640 !important; background:#fff !important; border-top:1px solid #dce3eb !important; z-index:9999 !important; font-family: Arial, sans-serif !important; font-weight:600 !important; }
+    .print-footer span { display:none !important; }
+    h1, #resumo, table, #rodapeSimulacao, .resumo-grid, .resumo-item, thead, tbody, tr, th, td { visibility:visible !important; }
+    table { display:table !important; }
+    .page-container { max-width:180mm !important; }
+    #resumo { margin:0 auto 10mm auto; padding:4mm 3mm; box-shadow:none !important; border:1px solid #dce3eb !important; max-width:172mm !important; font-size:8pt !important; }
+    .resumo-grid { grid-template-columns: repeat(4, minmax(60px, 1fr)) !important; gap:4px !important; }
+    .resumo-item { padding:4px 5px !important; }
+    .resumo-item span:first-child { font-size:0.6rem !important; }
+    .resumo-item span:last-child { font-size:0.72rem !important; }
+    table { width:100% !important; max-width:172mm !important; margin:0 auto 12mm auto !important; border-collapse:collapse !important; table-layout:fixed !important; font-size:9pt !important; border-radius:0 !important; box-shadow:none !important; }
+    th, td { border:1px solid #000 !important; padding:5px !important; word-wrap:break-word; }
+    th, td { font-size:9pt !important; }
+    th { background:#003366 !important; color:#fff !important; }
+    tbody tr:nth-child(odd) { background:#fff !important; }
+    tbody tr:hover { background:transparent !important; }
+    .carencia-row td { background:#e7f1ff !important; }
+    tr { page-break-inside:avoid; page-break-after:auto; }
+    thead { display:table-header-group; }
+    tfoot { display:table-footer-group; }
+    #rodapeSimulacao { margin:0 auto; padding:8mm 6mm 0 6mm; box-shadow:none !important; border:1px solid #dce3eb !important; font-size:9pt; max-width:172mm !important; page-break-inside:avoid !important; break-inside:avoid !important; }
+}
+</style>
+</head>
+
+<body>
+<div class="print-header">
+    <span class="print-header-left">Data da simulação: <span id="printDate"></span></span>
+    <span class="print-header-right">F3421879</span>
+</div>
+<div class="print-footer"><span></span></div>
+<div class="page-container">
+
+<h1>Simulação BB Capital de Giro - SAC</h1>
+
+<div class="dados-e-tabelas">
+<section class="dados-card">
+    <h2 class="card-title">Dados da Operação</h2>
+    <div class="form-grid">
+
+    <div class="field">
+        <label for="valor">Valor (R$)</label>
+        <input id="valor" type="number" min="0" step="0.01" value="429000">
+    </div>
+
+    <div class="field">
+        <label for="dataLiberacao">Data Contratação</label>
+        <input id="dataLiberacao" type="date">
+    </div>
+
+    <div class="field">
+        <label for="dataBase">Data Base</label>
+        <input id="dataBase" type="number" min="1" max="31">
+    </div>
+
+    <div class="field">
+        <label for="carencia">Carência</label>
+        <input id="carencia" type="number" value="1">
+    </div>
+
+    <div class="field">
+        <label for="prazo">Prazo Total</label>
+        <input id="prazo" type="number" value="25">
+    </div>
+
+    <div id="tipoContainer" class="field">
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+            <option value="cdiSt">CDI+ST</option>
+            <option value="percentual">%CDI</option>
+        </select>
+    </div>
+
+    <div id="taxasCdiContainer" class="field">
+            <label for="cdi">CDI (%)</label>
+            <input id="cdi" type="number" step="0.0001" value="14.4">
+    </div>
+
+    <div id="sobretaxaContainer" class="field">
+         <label for="sobretaxa">Sobretaxa (%)</label>
+         <input id="sobretaxa" type="number" step="0.0001" value="4.93">
+    </div>
+
+    <div id="percentualCdiContainer" class="field" style="display:none">
+         <label for="percentualCdi">% do CDI</label>
+         <input id="percentualCdi" type="number" step="0.0001" value="100">
+    </div>
+
+    <div id="seguroContainer" class="field">
+        <label for="seguro">Seguro</label>
+        <select id="seguro">
+            <option value="1">Sim</option>
+            <option value="0">Não</option>
+        </select>
+    </div>
+
+    <div id="sociosContainer" class="field">
+        <label for="socios">Sócios</label>
+        <input id="socios" type="number" min="1" value="1">
+    </div>
+
+    <div id="iofDiarioContainer" class="field">
+        <label for="iofDiario">IOF Diário (%)</label>
+        <input id="iofDiario" type="number" value="0.0082" step="0.0001" min="0">
+    </div>
+
+    <div id="iofAdicionalContainer" class="field">
+        <label for="iofAdicional">IOF Adicional (%)</label>
+        <input id="iofAdicional" type="number" value="0.38" step="0.0001" min="0">
+    </div>
+
+    <div id="iofFinanciadoContainer" class="field">
+        <label for="iofFinanciado">IOF Financiado?</label>
+        <select id="iofFinanciado">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+        </select>
+    </div>
+
+    <div id="tipoTacContainer" class="field">
+        <label for="tipoTac">TAC</label>
+        <select id="tipoTac">
+            <option value="automatico">Automática</option>
+            <option value="manual">Manual</option>
+        </select>
+    </div>
+
+    <div id="tacManualContainer" class="field" style="display:none">
+        <label for="tacManual">TAC Manual (R$)</label>
+        <input id="tacManual" type="number" min="0" step="0.01" value="0">
+    </div>
+
+    <div id="flatUnidadeContainer" class="field">
+        <label for="flatUnidade">Unidade Flat</label>
+        <select id="flatUnidade">
+            <option value="real">Real R$</option>
+            <option value="percentual">Percentual %</option>
+        </select>
+    </div>
+
+    <div id="flatValorContainer" class="field">
+        <label for="flatValor">Valor Flat</label>
+        <input id="flatValor" type="number" min="0" step="0.01" value="0">
+    </div>
+
+    </div>
+    <div class="obs-note">Valor da Flat: R$ 100,00 ou 0,01% - 5,00%</div>
+</section>
+
+<div class="tabelas-laterais">
+    <section class="table-card">
+        <h2 class="card-title">Regras FBA - Normal</h2>
+        <table class="mini-table">
+            <thead>
+                <tr><th>FBA</th><th>CARÊNCIA</th><th>REPOSIÇÃO</th><th>SISTEMA</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>< 360k</td><td>-</td><td>até 18</td><td>SAC</td></tr>
+                <tr><td>360k - 1M</td><td>até 3</td><td>até 24</td><td>SAC</td></tr>
+                <tr><td>1M - 5M</td><td>até 4</td><td>até 36</td><td>SAC</td></tr>
+                <tr><td>> 5M</td><td>até 6</td><td>até 48</td><td>SAC</td></tr>
+            </tbody>
+        </table>
+    </section>
+    <section class="table-card">
+        <h2 class="card-title">Regras FBA - Convênio 186361</h2>
+        <table class="mini-table">
+            <thead>
+                <tr><th>FBA</th><th>CARÊNCIA</th><th>REPOSIÇÃO</th><th>SISTEMA</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>< 360k</td><td>até 3</td><td>até 24</td><td>SAC</td></tr>
+                <tr><td>360k - 1M</td><td>até 4</td><td>até 36</td><td>SAC</td></tr>
+                <tr><td>1M - 5M</td><td>até 6</td><td>até 48</td><td>SAC</td></tr>
+                <tr><td>> 5M</td><td>até 9</td><td>até 60</td><td>SAC</td></tr>
+            </tbody>
+        </table>
+    </section>
+    <section class="table-card">
+        <h2 class="card-title">Impacto Limite Cliente</h2>
+        <table class="mini-table">
+            <tbody id="impactoLimiteCliente">
+                <tr><td>Fidejussória / Real</td><td>-</td></tr>
+                <tr><td>Total</td><td>-</td></tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+</div>
+
+<div class="button-row">
+    <button id="btnCalcular" onclick="calcular()">Calcular</button>
+    <button id="btnPrint" onclick="window.print()">Imprimir</button>
+    <button id="btnVoltar" onclick="voltar()">Voltar</button>
+</div>
+
+<div id="resumo"></div>
+
+<table>
+<thead>
+<tr>
+<th>Posição</th><th>Data</th><th>Capital</th><th>Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
+</tr>
+</thead>
+<tbody id="tabela"></tbody>
+</table>
+
+<div id="rodapeSimulacao"></div>
+</div>
+
+<script>
+
+const IOF_DIARIO = 0.000082;
+const IOF_ADICIONAL = 0.0038;
+
+const feriados = [
+"2025-01-01","2025-03-03","2025-03-04","2025-04-18","2025-04-21",
+"2025-05-01","2025-06-19","2025-09-07","2025-10-12","2025-11-02",
+"2025-11-15","2025-11-20","2025-12-25",
+"2026-01-01","2026-02-16","2026-02-17","2026-04-03","2026-04-21",
+"2026-05-01","2026-06-04","2026-09-07","2026-10-12","2026-11-02",
+"2026-11-15","2026-11-20","2026-12-25",
+"2027-01-01","2027-02-08","2027-02-09","2027-03-26","2027-04-21",
+"2027-05-01","2027-05-27","2027-09-07","2027-10-12","2027-11-02",
+"2027-11-15","2027-11-20","2027-12-25",
+"2028-01-01","2028-02-28","2028-02-29","2028-04-14","2028-04-21",
+"2028-05-01","2028-06-15","2028-09-07","2028-10-12","2028-11-02",
+"2028-11-15","2028-11-20","2028-12-25",
+"2029-01-01","2029-02-12","2029-02-13","2029-03-30","2029-04-21",
+"2029-05-01","2029-05-31","2029-09-07","2029-10-12","2029-11-02",
+"2029-11-15","2029-11-20","2029-12-25",
+"2030-01-01","2030-03-04","2030-03-05","2030-04-19","2030-04-21",
+"2030-05-01","2030-06-20","2030-09-07","2030-10-12","2030-11-02",
+"2030-11-15","2030-11-20","2030-12-25",
+"2031-01-01","2031-02-24","2031-02-25","2031-04-11","2031-04-21",
+"2031-05-01","2031-06-12","2031-09-07","2031-10-12","2031-11-02",
+"2031-11-15","2031-11-20","2031-12-25",
+"2032-01-01","2032-02-09","2032-02-10","2032-03-26","2032-04-21",
+"2032-05-01","2032-05-27","2032-09-07","2032-10-12","2032-11-02",
+"2032-11-15","2032-11-20","2032-12-25",
+"2033-01-01","2033-02-28","2033-03-01","2033-04-15","2033-04-21",
+"2033-05-01","2033-06-16","2033-09-07","2033-10-12","2033-11-02",
+"2033-11-15","2033-11-20","2033-12-25",
+"2034-01-01","2034-02-20","2034-02-21","2034-04-07","2034-04-21",
+"2034-05-01","2034-06-08","2034-09-07","2034-10-12","2034-11-02",
+"2034-11-15","2034-11-20","2034-12-25",
+"2035-01-01","2035-02-05","2035-02-06","2035-03-23","2035-04-21",
+"2035-05-01","2035-05-24","2035-09-07","2035-10-12","2035-11-02",
+"2035-11-15","2035-11-20","2035-12-25"
+];
+
+function parseDateLocal(value){
+    if(!value) return null;
+    const parts = value.split('-');
+    if(parts.length !== 3) return null;
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+}
+
+function formatDateLocal(date){
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function formatDateBR(value){
+    if(typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/)){
+        const parts = value.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    const date = new Date(value);
+    if(isNaN(date)) return value;
+    return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+}
+
+function formatReal(value){
+    if(isNaN(value) || value === null) return "R$ 0,00";
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function cloneDate(d){
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function diasCorridos(d1, d2){
+    let a = cloneDate(d1);
+    let b = cloneDate(d2);
+    return Math.max(Math.floor((b-a)/(1000*60*60*24)),0);
+}
+
+function diasNoMes(ano, mes){
+    return new Date(ano, mes + 1, 0).getDate();
+}
+
+function computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, financedTotal, car, amortFinanceiro, d0){
+    let totalIof = 0;
+    let saldoIofCalc = valor + financedTotal;
+    let diasAcumuladosIofCalc = 0;
+    const iofShare = financedTotal / amortFinanceiro;
+    const parcelasIofDiarias = [];
+
+    for(let i=0;i<datas.length;i++){
+        let data = datas[i];
+        let anterior = (i === 0) ? cloneDate(d0) : datas[i-1];
+        let dc = diasCorridos(anterior, data);
+        let principalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
+        let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIofCalc);
+        let iofPeriodo = 0;
+        if(diasConsiderados > 0){
+            iofPeriodo = saldoIofCalc * iofDiarioRate * diasConsiderados;
+            totalIof += iofPeriodo;
+            diasAcumuladosIofCalc += diasConsiderados;
+        }
+        parcelasIofDiarias.push(iofPeriodo);
+        if(i+1 > car){
+            saldoIofCalc -= principalParcela + iofShare;
+            if(saldoIofCalc < 0) saldoIofCalc = 0;
+        }
+    }
+
+    return { totalIof, parcelasIofDiarias };
+}
+
+function calcularCetAnual(valorLiberado, fluxos){
+    if(valorLiberado <= 0 || fluxos.length === 0) return null;
+    function npv(taxa){
+        return fluxos.reduce((total, fluxo) => {
+            return total + fluxo.valor / ((1 + taxa) ** (fluxo.dias / 365));
+        }, 0) - valorLiberado;
+    }
+    let min = -0.9999;
+    let max = 1;
+    while(npv(max) > 0 && max < 100){
+        max *= 2;
+    }
+    for(let i=0;i<80;i++){
+        const meio = (min + max) / 2;
+        if(npv(meio) > 0){
+            min = meio;
+        } else {
+            max = meio;
+        }
+    }
+    return (min + max) / 2;
+}
+
+const tabelaSeguro = [
+{min:30,max:92,taxa:0.007412},{min:93,max:184,taxa:0.008895},{min:185,max:276,taxa:0.011563},
+{min:277,max:368,taxa:0.011859},{min:369,max:460,taxa:0.022236},{min:461,max:552,taxa:0.023126},
+{min:553,max:644,taxa:0.023452},{min:645,max:736,taxa:0.023719},{min:737,max:828,taxa:0.032020},
+{min:829,max:920,taxa:0.032613},{min:921,max:1012,taxa:0.034244},{min:1013,max:1104,taxa:0.035578},
+{min:1105,max:1196,taxa:0.044324},{min:1197,max:1288,taxa:0.045658},{min:1289,max:1380,taxa:0.046696},
+{min:1381,max:1472,taxa:0.047437},{min:1473,max:1564,taxa:0.057458},{min:1565,max:1656,taxa:0.057636},
+{min:1657,max:1748,taxa:0.058585},{min:1749,max:1840,taxa:0.059719},{min:1841,max:1932,taxa:0.063713},
+{min:1933,max:2024,taxa:0.083818},{min:2025,max:2116,taxa:0.087628},{min:2117,max:2208,taxa:0.091438},
+{min:2209,max:2300,taxa:0.109246},{min:2301,max:2392,taxa:0.113616},{min:2393,max:2484,taxa:0.117986},
+{min:2485,max:2576,taxa:0.122355},{min:2577,max:2668,taxa:0.126725},{min:2669,max:2760,taxa:0.131095},
+{min:2761,max:2852,taxa:0.135465},{min:2853,max:2944,taxa:0.139835},{min:2945,max:3653,taxa:0.144205}
+];
+
+function obterTaxaSeguro(dias){
+    const faixa = tabelaSeguro.find(f => dias >= f.min && dias <= f.max);
+    return faixa ? faixa.taxa : 0;
+}
+
+function ehUtil(data){
+    return data.getDay() !== 0 && data.getDay() !== 6 && !feriados.includes(formatDateLocal(data));
+}
+
+function proximoUtil(data){
+    let d = new Date(data);
+    while(!ehUtil(d)){
+        d.setDate(d.getDate() + 1);
+    }
+    return d;
+}
+
+function diasUteis(d1, d2){
+    let count = 0;
+    let d = new Date(d1);
+    while(d < d2){
+        if(ehUtil(d)) count++;
+        d.setDate(d.getDate() + 1);
+    }
+    return count;
+}
+
+function jurosCDI(saldo, taxaDiaria, diasUteis){
+    return saldo * (Math.pow(taxaDiaria, diasUteis) - 1);
+}
+
+function atualizarImpactoLimite(valorContratado, diasTotais){
+    const periodo = diasTotais > 420 ? "Longo Prazo" : "Curto Prazo";
+    impactoLimiteCliente.innerHTML = `
+        <tr><td>Fidejussória / Real ${periodo}</td><td>${formatReal(valorContratado)}</td></tr>
+        <tr><td>Total ${periodo}</td><td>${formatReal(valorContratado)}</td></tr>
+    `;
+}
+
+function calcular(){
+
+    let valor = parseFloat(valorInput.value);
+    let prazo = parseInt(prazoInput.value);
+    let car = parseInt(carenciaInput.value);
+    let base = parseInt(dataBaseInput.value);
+    let usarSeguro = seguroSelect.value === "1";
+    let numSocios = parseInt(sociosInput.value) || 1;
+    let tipo = tipoSelect.value;
+    let cdiValor = parseFloat(cdiInput.value) / 100;
+    let sobretaxaValor = parseFloat(sobretaxaInput.value) / 100;
+    let percentualCdiValor = parseFloat(percentualCdiInput.value) / 100;
+    let iofFinanciado = iofFinanciadoSelect.value === "true";
+    let d0 = parseDateLocal(dataLiberacaoInput.value);
+
+    if(!valor || !prazo || !d0 || isNaN(d0.getTime())){
+        alert("Preencha todos os campos obrigatórios.");
+        return;
+    }
+
+    let amortFinanceiro = prazo - car;
+    if(amortFinanceiro <= 0){
+        alert("Prazo deve ser maior que a carência.");
+        return;
+    }
+
+    if(tipo === "cdiSt"){
+        if(isNaN(cdiValor) || cdiValor <= 0){
+            alert("Informe a taxa CDI (%). ");
+            return;
+        }
+        if(isNaN(sobretaxaValor)){
+            alert("Informe a Sobretaxa (%). ");
+            return;
+        }
+    } else {
+        if(isNaN(cdiValor) || cdiValor <= 0){
+            alert("Informe a taxa CDI (%). ");
+            return;
+        }
+        if(isNaN(percentualCdiValor) || percentualCdiValor <= 0){
+            alert("Informe o percentual do CDI (%). ");
+            return;
+        }
+    }
+
+    let taxaAnual = 1;
+    let taxaDiaria = 1;
+    if(tipo === "cdiSt"){
+        taxaAnual = (1 + cdiValor) * (1 + sobretaxaValor);
+        taxaDiaria = Math.pow(taxaAnual, 1 / 252);
+    } else {
+        const cdiDiario = Math.pow(1 + cdiValor, 1 / 252) - 1;
+        taxaDiaria = 1 + (cdiDiario * percentualCdiValor);
+        taxaAnual = Math.pow(taxaDiaria, 252);
+    }
+
+    // TAC
+    let tacAutomatico = valor * 0.03;
+    if(tacAutomatico < 100) tacAutomatico = 100;
+    if(tacAutomatico > 5000) tacAutomatico = 5000;
+
+    const tacManual = parseFloat(tacManualInput.value);
+    const tac = tipoTacSelect.value === "manual" ? tacManual : tacAutomatico;
+
+    if(tipoTacSelect.value === "manual" && isNaN(tacManual)){
+        alert("Informe a TAC Manual - Pode ser zero.");
+        return;
+    }
+
+    // Comissão Flat
+    const flatUnidade = flatUnidadeSelect.value;
+    const flatValorInputValue = parseFloat(flatValorInput.value) || 0;
+    let comissaoFlat = 0;
+    if(flatUnidade === "real"){
+        comissaoFlat = flatValorInputValue;
+    } else {
+        comissaoFlat = valor * (flatValorInputValue / 100);
+    }
+
+    // IOF
+    const iofDiarioRate = parseFloat(iofDiarioInput.value || 0.0082) / 100;
+    const iofAdicionalRate = parseFloat(iofAdicionalInput.value || 0.38) / 100;
+    let totalIofDiario = 0;
+    let iofAdicionalTotal = valor * iofAdicionalRate;
+    let totalIOF = iofAdicionalTotal;
+    let totalIofFinanciado = 0;
+    let diasAcumuladosIOF = 0;
+    let iofFinanciadoShare = 0;
+    const isCdiSt = tipo === "cdiSt";
+
+    // Gerar datas das parcelas
+    let datas = [];
+    const firstMonthOffset = base < d0.getDate() ? 2 : 1;
+
+    for(let i=1;i<=prazo;i++){
+        let dt;
+        if(i === 1){
+            dt = cloneDate(d0);
+            dt.setMonth(d0.getMonth() + firstMonthOffset);
+        } else {
+            dt = cloneDate(datas[datas.length - 1]);
+            dt.setMonth(dt.getMonth() + 1);
+        }
+
+        dt.setDate(base);
+        if(!ehUtil(dt)){
+            dt = proximoUtil(dt);
+        }
+
+        if(datas.length > 0){
+            const ultima = datas[datas.length - 1];
+            if(dt <= ultima){
+                dt = cloneDate(ultima);
+                dt.setMonth(dt.getMonth() + 1);
+                dt.setDate(base);
+                if(!ehUtil(dt)){
+                    dt = proximoUtil(dt);
+                }
+            }
+        }
+
+        datas.push(dt);
+    }
+
+    tabela.innerHTML = "";
+
+    let totalJuros = 0;
+    let totalPago = 0;
+    let fluxosParcelas = [];
+    let saldoDevedor = valor;
+
+    const diasTotaisOp = diasCorridos(d0, datas[datas.length - 1]);
+    const taxaSeguroOp = obterTaxaSeguro(diasTotaisOp);
+    let totalSeguroValor = 0;
+    if(usarSeguro){
+        totalSeguroValor = numSocios * taxaSeguroOp * valor;
+    }
+    let numParcelasSeguro = prazo - 1;
+    let seguroParcela = numParcelasSeguro > 0 ? totalSeguroValor / numParcelasSeguro : 0;
+
+    atualizarImpactoLimite(valor, diasTotaisOp);
+
+    if(iofFinanciado){
+        for(let iter = 0; iter < 50; iter++){
+            const result = computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, totalIofFinanciado, car, amortFinanceiro, d0);
+            totalIofDiario = result.totalIof;
+            const nextTotalIofFinanciado = (totalIofDiario + valor * iofAdicionalRate) / (1 - iofAdicionalRate);
+            if(Math.abs(nextTotalIofFinanciado - totalIofFinanciado) < 0.01){
+                totalIofFinanciado = nextTotalIofFinanciado;
+                break;
+            }
+            totalIofFinanciado = nextTotalIofFinanciado;
+        }
+        totalIofDiario = Math.round(totalIofDiario * 100) / 100;
+        totalIofFinanciado = Math.round(totalIofFinanciado * 100) / 100;
+        iofAdicionalTotal = Math.round((totalIofFinanciado - totalIofDiario) * 100) / 100;
+        if(iofAdicionalTotal < 0) iofAdicionalTotal = 0;
+        totalIOF = iofAdicionalTotal;
+
+        iofFinanciadoShare = (totalIofDiario + iofAdicionalTotal) / amortFinanceiro;
+        saldoDevedor = valor + totalIofFinanciado;
+    }
+
+    for(let i=0;i<prazo;i++){
+        let data = datas[i];
+        let anterior = (i === 0) ? cloneDate(d0) : datas[i-1];
+        let du = diasUteis(anterior, data);
+        let dc = diasCorridos(anterior, data);
+
+        let jurosPeriodo = jurosCDI(saldoDevedor, taxaDiaria, du);
+        if(iofFinanciado && i+1 > car){
+            jurosPeriodo += iofFinanciadoShare;
+        }
+
+        let capitalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
+        let parcelaTotal = jurosPeriodo + capitalParcela;
+
+        let iofPeriodo = 0;
+        if(!iofFinanciado){
+            let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIOF);
+            if(diasConsiderados > 0){
+                iofPeriodo = saldoDevedor * iofDiarioRate * diasConsiderados;
+                iofPeriodo = Math.round(iofPeriodo * 100) / 100;
+                totalIofDiario += iofPeriodo;
+                totalIOF += iofPeriodo;
+                diasAcumuladosIOF += diasConsiderados;
+            }
+        }
+
+        let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
+        parcelaTotal += seguroAtual;
+
+        if(iofFinanciado && i+1 > car){
+            saldoDevedor -= capitalParcela + iofFinanciadoShare;
+        } else {
+            saldoDevedor -= capitalParcela;
+        }
+        if(saldoDevedor < 0.01) saldoDevedor = 0;
+
+        const diasCorridosParcela = diasCorridos(d0, data);
+        fluxosParcelas.push({
+            valor: parcelaTotal,
+            dias: diasCorridosParcela
+        });
+
+        totalJuros += jurosPeriodo;
+        totalPago += parcelaTotal;
+
+        tabela.innerHTML += `
+        <tr ${i+1 <= car ? 'class="carencia-row"' : ''}>
+        <td>${i+1}</td>
+        <td>${data.toLocaleDateString()}</td>
+        <td>${formatReal(capitalParcela)}</td>
+        <td>${formatReal(jurosPeriodo)}</td>
+        <td>${formatReal(parcelaTotal)}</td>
+        <td>${formatReal(saldoDevedor)}</td>
+        </tr>`;
+    }
+
+    const totalIoFTotal = totalIofDiario + iofAdicionalTotal;
+    let despesaLiberacao = (iofFinanciado ? 0 : totalIOF) + (usarSeguro ? seguroParcela : 0) + tac + comissaoFlat;
+    let totalFinal = totalPago + despesaLiberacao;
+
+    const valorLiberado = valor - despesaLiberacao;
+    const cetAnual = calcularCetAnual(valorLiberado, fluxosParcelas);
+    const cetMensal = cetAnual === null ? null : ((1 + cetAnual) ** (1 / 12)) - 1;
+
+    const textoCetMensal = cetMensal === null ? "N/A" : `${(cetMensal * 100).toFixed(2)}% a.m.`;
+    const textoCetAnual = cetAnual === null ? "N/A" : `${(cetAnual * 100).toFixed(2)}% a.a.`;
+    const taxaMensalAtual = Math.pow(taxaAnual, 1/12) - 1;
+    const textoTaxaMensalAtual = `${(taxaMensalAtual * 100).toFixed(2)}% a.m.`;
+    const totalLiquido = valor - despesaLiberacao;
+    const textoLegendaParcela = usarSeguro ? "    ³Inclui valor da parcela do prestamista." : "";
+    const textoTipoDetalhe = tipo === "cdiSt"
+        ? `<div class="resumo-item"><span>Sobretaxa</span><span>${(sobretaxaValor*100).toFixed(2)}%</span></div>`
+        : `<div class="resumo-item"><span>% do CDI</span><span>${(percentualCdiValor*100).toFixed(2)}%</span></div>`;
+
+    resumo.innerHTML = `
+    <h3>Resumo</h3>
+    <div class="resumo-grid">
+        <div class="resumo-item"><span>Valor</span><span>${formatReal(valor)}</span></div>
+        <div class="resumo-item"><span>Taxa Mensal¹</span><span>${textoTaxaMensalAtual}</span></div>
+        <div class="resumo-item"><span>Contratação</span><span>${formatDateBR(dataLiberacaoInput.value)}</span></div>
+        <div class="resumo-item"><span>Data Base</span><span>${dataBaseInput.value}</span></div>
+        <div class="resumo-item"><span>Carência</span><span>${car}</span></div>
+        <div class="resumo-item"><span>Prazo Total</span><span>${prazo}</span></div>
+        ${textoTipoDetalhe}
+        <div class="resumo-item"><span>Seguro Total</span><span>${formatReal(totalSeguroValor)}</span></div>
+        <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroParcela)}</span></div>
+        <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIoFTotal)}</span></div>
+        <div class="resumo-item"><span>TAC</span><span>${formatReal(tac)}</span></div>
+        <div class="resumo-item"><span>Despesa Total²</span><span>${formatReal(despesaLiberacao)}</span></div>
+        <div class="resumo-item"><span>CET Mensal</span><span>${textoCetMensal}</span></div>
+        <div class="resumo-item"><span>CET Anual</span><span>${textoCetAnual}</span></div>
+        <div class="resumo-item"><span>Total a Pagar</span><span>${formatReal(totalFinal)}</span></div>
+        <div class="resumo-item"><span>Total Líquido</span><span>${formatReal(totalLiquido)}</span></div>
+    </div>
+    `;
+
+    rodapeSimulacao.innerHTML = `
+    ¹Valor depende da quantidade de dias corridos entre as datas bases;<br>
+    ²Inclui valores de ${iofFinanciado ? "" : "IOF, "}Flat, Tarifa Abertura de Crédito (TAC)${usarSeguro ? " e Prestamista;" : "."}<br>
+${textoLegendaParcela}</p>
+
+    <h3>OBSERVAÇÕES</h3>
+    <p>A presente simulação não possui caráter de proposta financeira vinculante ou de estruturação de negócio.</p>
+    <p>As condições apresentadas, em especial a taxa de juros, o prazo e o valor das despesas, poderão ser alteradas sem aviso prévio.</p>
+    <p>Na simulação do cálculo do IOF foi considerada a alíquota padrão para operações com Pessoa Jurídica.</p>
+    <p>O Valor apresentado para seguro prestamista é uma aproximação, podendo variar a depender da data de liberação e dia base das parcelas.</p>
+    <p>As propostas de operações de crédito estão sujeitas a prévia análise e aprovação pelo Banco do Brasil.</p>
+    `;
+
+    resultadosValidos = true;
+    if(btnPrint) btnPrint.disabled = false;
+}
+
+function resetarResultados(){
+    if(resultadosValidos){
+        resultadosValidos = false;
+        tabela.innerHTML = "";
+        resumo.innerHTML = `<p style='color:#b2202f;font-weight:700;'>Alguns dados foram alterados. Clique em Calcular novamente para atualizar a simulação.</p>`;
+        rodapeSimulacao.innerHTML = "";
+        if(btnPrint) btnPrint.disabled = true;
+    }
+}
+
+// INPUTS
+const valorInput = document.getElementById("valor");
+const prazoInput = document.getElementById("prazo");
+const carenciaInput = document.getElementById("carencia");
+const dataBaseInput = document.getElementById("dataBase");
+const dataLiberacaoInput = document.getElementById("dataLiberacao");
+const tipoSelect = document.getElementById("tipo");
+const taxasCdiContainer = document.getElementById("taxasCdiContainer");
+const cdiInput = document.getElementById("cdi");
+const sobretaxaContainer = document.getElementById("sobretaxaContainer");
+const sobretaxaInput = document.getElementById("sobretaxa");
+const percentualCdiContainer = document.getElementById("percentualCdiContainer");
+const percentualCdiInput = document.getElementById("percentualCdi");
+const iofDiarioInput = document.getElementById("iofDiario");
+const iofAdicionalInput = document.getElementById("iofAdicional");
+const iofFinanciadoSelect = document.getElementById("iofFinanciado");
+const seguroSelect = document.getElementById("seguro");
+const sociosInput = document.getElementById("socios");
+const sociosContainer = document.getElementById("sociosContainer");
+const tipoTacSelect = document.getElementById("tipoTac");
+const tacManualInput = document.getElementById("tacManual");
+const tacManualContainer = document.getElementById("tacManualContainer");
+const flatUnidadeSelect = document.getElementById("flatUnidade");
+const flatValorInput = document.getElementById("flatValor");
+const parcelaHeader = document.getElementById("parcelaHeader");
+const tabela = document.getElementById("tabela");
+const resumo = document.getElementById("resumo");
+const rodapeSimulacao = document.getElementById("rodapeSimulacao");
+const impactoLimiteCliente = document.getElementById("impactoLimiteCliente");
+const btnPrint = document.getElementById("btnPrint");
+
+let resultadosValidos = false;
+let baseFoiAlteradaPeloUsuario = false;
+
+function inicializarDatas(){
+    const hoje = new Date();
+    const y = hoje.getFullYear();
+    const m = String(hoje.getMonth() + 1).padStart(2, '0');
+    const d = String(hoje.getDate()).padStart(2, '0');
+    dataLiberacaoInput.value = `${y}-${m}-${d}`;
+    dataBaseInput.value = hoje.getDate();
+    baseFoiAlteradaPeloUsuario = false;
+}
+
+function atualizarDataBase(){
+    if(baseFoiAlteradaPeloUsuario) return;
+    const val = dataLiberacaoInput.value;
+    if(val){
+        const parts = val.split('-');
+        if(parts.length === 3){
+            dataBaseInput.value = parseInt(parts[2], 10);
+        }
+    }
+}
+
+function atualizarSocios(){
+    const usarSeguro = seguroSelect.value === "1";
+    sociosContainer.style.display = usarSeguro ? "flex" : "none";
+    parcelaHeader.textContent = usarSeguro ? "Parcela³" : "Parcela";
+}
+
+function atualizarTacManual(){
+    const usarManual = tipoTacSelect.value === "manual";
+    tacManualContainer.style.display = usarManual ? "block" : "none";
+}
+
+function atualizarTipoTaxa(){
+    const mostrarCdiSt = tipoSelect.value === "cdiSt";
+    taxasCdiContainer.style.display = "";
+    sobretaxaContainer.style.display = mostrarCdiSt ? "" : "none";
+    percentualCdiContainer.style.display = mostrarCdiSt ? "none" : "";
+}
+
+function voltar(){
+    window.location.href = 'simuladores.html';
+}
+
+function bindResultsResetListeners(){
+    const containers = document.querySelectorAll('.dados-card input, .dados-card select');
+    containers.forEach(el => {
+        el.addEventListener('input', resetarResultados);
+        el.addEventListener('change', resetarResultados);
+    });
+}
+
+const printDateSpan = document.getElementById("printDate");
+function atualizarCabecalhoImpressao(){
+    if(printDateSpan){
+        printDateSpan.textContent = formatDateBR(new Date());
+    }
+}
+
+inicializarDatas();
+atualizarDataBase();
+dataLiberacaoInput.addEventListener("input", () => { atualizarDataBase(); resetarResultados(); });
+dataBaseInput.addEventListener("input", () => { baseFoiAlteradaPeloUsuario = true; resetarResultados(); });
+seguroSelect.addEventListener("change", atualizarSocios);
+tipoTacSelect.addEventListener("change", atualizarTacManual);
+tipoSelect.addEventListener("change", () => { atualizarTipoTaxa(); resetarResultados(); });
+atualizarCabecalhoImpressao();
+bindResultsResetListeners();
+window.onbeforeprint = atualizarCabecalhoImpressao;
+if(btnPrint) btnPrint.disabled = true;
+atualizarSocios();
+atualizarTacManual();
+atualizarTipoTaxa();
+
+</script>
+
+</body>
+</html>
