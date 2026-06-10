@@ -843,6 +843,16 @@ function inicializarDatas(){
     dataBaseInput.value = hoje.getDate();
 }
 
+function atualizarDataBase(){
+    const val = dataLiberacaoInput.value;
+    if(val){
+        const parts = val.split('-');
+        if(parts.length === 3){
+            dataBaseInput.value = parseInt(parts[2], 10);
+        }
+    }
+}
+
 function atualizarTipoTaxa(){
     const usarPrefixado = tipo.value === "prefixado";
     taxasCdiContainer.style.display = usarPrefixado ? "none" : "block";
@@ -901,9 +911,11 @@ function atualizarCabecalhoImpressao(){
 }
 
 inicializarDatas();
+atualizarDataBase();
 tipo.addEventListener("change", atualizarTipoTaxa);
 seguroSelect.addEventListener("change", atualizarSocios);
 tipoTacSelect.addEventListener("change", atualizarTacManual);
+dataLiberacaoInput.addEventListener("input", () => { atualizarDataBase(); resetarResultados(); });
 atualizarCabecalhoImpressao();
 bindResultsResetListeners();
 window.onbeforeprint = atualizarCabecalhoImpressao;
