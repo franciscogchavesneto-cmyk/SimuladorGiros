@@ -10,6 +10,7 @@ h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; lette
 @media print { h1 { font-size:1.5rem; } }
 
 .table-card, .dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
+.table-card { margin-bottom:8px; }
 .card-title { font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
 .dados-card .card-title::before{ content:""; width:28px; height:28px; background:#eef6fb; display:inline-block; border-radius:6px; box-shadow:inset 0 0 0 1px #d8eaf6; }
 .dados-card .form-grid { gap:16px 20px; }
@@ -73,6 +74,7 @@ input, select { max-width:none; }
 .mini-table { width:100%; border-collapse:collapse; margin-top:10px; }
 .mini-table th, .mini-table td { border:1px solid #d7dbe1; padding:10px; font-size:0.92rem; text-align:center; white-space:nowrap; }
 .mini-table th { background:#003366; color:#fff; font-weight:700; }
+.mini-table td:first-child { width:60%; }
 .obs-note { margin-top:10px; font-size:0.82rem; color:#5b6f89; line-height:1.4; }
 
 .field.full-width { grid-column: 1 / -1; display:grid; grid-template-columns: repeat(2, minmax(160px, 180px)); gap:18px 24px; justify-content:start; }
@@ -158,7 +160,7 @@ tbody tr:hover { background:#eef3fb; }
 <body>
 <div class="print-header">
     <span class="print-header-left">Data da simulação: <span id="printDate"></span></span>
-    <span class="print-header-right">F3421879</span>
+    <span class="print-header-right">Não possui caráter de proposta financeira</span>
 </div>
 <div class="print-footer"><span></span></div>
 <div class="page-container">
@@ -312,6 +314,11 @@ tbody tr:hover { background:#eef3fb; }
             </tbody>
         </table>
     </section>
+        <table class="mini-table">
+            <tbody>
+                <tr><td>Desenvolvido por F3421879 - Guerreiro</td><td>v1.0</td></tr>
+            </tbody>
+        </table>
 </div>
 </div>
 
@@ -622,8 +629,6 @@ function calcular(){
         totalIOF = iofAdicionalTotal;
     }
 
-    atualizarImpactoLimite(valor, diasTotaisOp);
-
     const iofFinanciadoShare = (iofFinanciado && sistema === "sac") ? (totalIofDiario + iofAdicionalTotal) / amortFinanceiro : 0;
     const usarPrincipalEstendido = (sistema === "sac" && base < diasNoMes(d0.getFullYear(), d0.getMonth()));
 
@@ -717,6 +722,8 @@ function calcular(){
                 diasAcumuladosIOF += diasConsiderados;
             }
         }
+
+    atualizarImpactoLimite(valor + totalIofFinanciado, diasTotaisOp);
 
         // Seguro
         let seguroAtual = (usarSeguro && !seguroIntegral && i < prazo - 2) ? seguroParcela : 0;
