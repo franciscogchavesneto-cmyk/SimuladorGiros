@@ -69,6 +69,7 @@ input, select { max-width:none; }
 .mini-table { width:100%; border-collapse:collapse; margin-top:10px; }
 .mini-table th, .mini-table td { border:1px solid #d7dbe1; padding:10px; font-size:0.92rem; text-align:center; white-space:nowrap; }
 .mini-table th { background:#003366; color:#fff; font-weight:700; }
+.mini-table td:first-child { width:60%; }
 
 .field.full-width {
     grid-column: 1 / -1;
@@ -171,7 +172,7 @@ tbody tr:hover { background:#eef3fb; }
 <body>
 <div class="print-header">
     <span class="print-header-left">Data da simulação: <span id="printDate"></span></span>
-    <span class="print-header-right">F3421879</span>
+    <span class="print-header-right">Não possui caráter de proposta financeira</span>
 </div>
 <div class="print-footer"><span></span></div>
 <div class="page-container">
@@ -269,6 +270,11 @@ tbody tr:hover { background:#eef3fb; }
             </tbody>
         </table>
     </section>
+        <table class="mini-table">
+            <tbody>
+                <tr><td>Sistema de Simulação Capital de Giro</td><td>v1.0</td></tr>
+            </tbody>
+        </table>
 </div>
 </div>
 
@@ -752,12 +758,21 @@ function bindResultsResetListeners(){
     });
 }
 
+function avisoParametroFBA(){
+    alert("Para alterar este parâmetro, mude o FBA do último exercício!");
+}
+
 const printDateSpan = document.getElementById("printDate");
 function atualizarCabecalhoImpressao(){
     if(printDateSpan){
         printDateSpan.textContent = formatDateBR(new Date());
     }
 }
+
+// Add warning to readonly FBA-dependent fields
+carenciaInput.addEventListener("click", avisoParametroFBA);
+prazoInput.addEventListener("click", avisoParametroFBA);
+st.addEventListener("click", avisoParametroFBA);
 
 inicializarDatas();
 atualizarDataBase();
