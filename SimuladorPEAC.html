@@ -785,7 +785,7 @@ if(tipoTacSelect.value === "manual" && isNaN(tacManual)){
     `;
 
     rodapeSimulacao.innerHTML = `
-    ¹Valor depende da quantidade de ${tipoDiasTaxa} entre as datas bases;<br>
+    ¹Valor depende da quantidade de ${tipoDiasTaxa} entre as datas-base${tipo.value==="cdi" ? " e CDI;" : ";"}<br>
     ²Fator K para cálculo do ECG, disponibilizado pelo BNDES;<br>
     ³Inclui valores de ${itensDespesa.join(", ")};<br>
 ${legendaParcela}</p>
