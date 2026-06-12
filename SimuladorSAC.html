@@ -801,9 +801,9 @@ function calcular(){
         <div class="resumo-item"><span>Total Líq.</span><span>${formatReal(totalLiquido)}</span></div>
     </div>
     `;
-
+    
     rodapeSimulacao.innerHTML = `
-    ¹Valor depende da quantidade de dias corridos entre as datas-base e CDI;<br>
+    ¹Valor depende da quantidade de dias corridos entre as datas-base e CDI (${cdiInput.value}% a.a. atualmente);<br>
     ²Inclui valores de ${iofFinanciado ? "" : "IOF, "}Flat, Tarifa Abertura de Crédito (TAC)${usarSeguro ? " e Prestamista;" : "."}<br>
 ${textoLegendaParcela}</p>
 
