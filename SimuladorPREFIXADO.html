@@ -9,8 +9,8 @@
 h1 { color:#003366; text-align:center; margin-bottom:24px; font-size:2rem; letter-spacing:0.02em; }
 @media print { h1 { font-size:1.5rem; } }
 
+/* Card: Dados da Empresa e da Operação */
 .table-card, .dados-card { background:#fff; border-radius:12px; padding:18px; border:1px solid #e6eef6; box-shadow:0 8px 20px rgba(15,41,77,0.04); margin-bottom:18px; }
-.table-card { margin-bottom:8px; }
 .card-title { font-size:1rem; color:#1f3b5a; margin:0 0 12px 0; display:flex; align-items:center; gap:10px; }
 .dados-card .card-title::before{ content:""; width:28px; height:28px; background:#eef6fb; display:inline-block; border-radius:6px; box-shadow:inset 0 0 0 1px #d8eaf6; }
 .dados-card .form-grid { gap:16px 20px; }
@@ -55,18 +55,13 @@ input, select { max-width:none; }
     label { width:auto; }
 }
 
-#sistemaContainer { grid-column: 1; grid-row: 3; }
-#taxaPrefixadoContainer { grid-column: 2; grid-row: 3; }
+#fbaContainer { grid-column: 1; grid-row: 2; }
+#taxasCdiContainer { grid-column: 1; grid-row: 3; }
+#sobretaxaContainer { grid-column: 2; grid-row: 3; }
 #seguroContainer { grid-column: 1; grid-row: 4; }
 #sociosContainer { grid-column: 2; grid-row: 4; }
-#tipoSeguroContainer { grid-column: 3; grid-row: 4; }
 #iofDiarioContainer { grid-column: 1; grid-row: 5; }
 #iofAdicionalContainer { grid-column: 2; grid-row: 5; }
-#iofFinanciadoContainer { grid-column: 3; grid-row: 5; }
-#tipoTacContainer { grid-column: 1; grid-row: 6; }
-#tacManualContainer { grid-column: 2; grid-row: 6; }
-#flatUnidadeContainer { grid-column: 1; grid-row: 7; }
-#flatValorContainer { grid-column: 2; grid-row: 7; }
 
 .dados-e-tabelas { display:grid; grid-template-columns: 1.6fr 1fr; gap:24px; align-items:start; }
 .tabelas-laterais { display:grid; gap:18px; }
@@ -75,11 +70,28 @@ input, select { max-width:none; }
 .mini-table th, .mini-table td { border:1px solid #d7dbe1; padding:10px; font-size:0.92rem; text-align:center; white-space:nowrap; }
 .mini-table th { background:#003366; color:#fff; font-weight:700; }
 .mini-table td:first-child { width:60%; }
-.obs-note { margin-top:10px; font-size:0.82rem; color:#5b6f89; line-height:1.4; }
 
-.field.full-width { grid-column: 1 / -1; display:grid; grid-template-columns: repeat(2, minmax(160px, 180px)); gap:18px 24px; justify-content:start; }
-.subfield { display:grid; grid-template-columns: 140px minmax(120px, 220px); align-items:center; gap:10px; }
-.field-inline { display:grid; grid-template-columns: 120px 1fr; align-items:center; gap:8px; }
+.field.full-width {
+    grid-column: 1 / -1;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(160px, 180px));
+    gap:18px 24px;
+    justify-content:start;
+}
+
+.subfield {
+    display:grid;
+    grid-template-columns: 140px minmax(120px, 220px);
+    align-items:center;
+    gap:10px;
+}
+
+.field-inline {
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    align-items:center;
+    gap:8px;
+}
 
 .button-row {
     display:flex;
@@ -165,7 +177,7 @@ tbody tr:hover { background:#eef3fb; }
 <div class="print-footer"><span></span></div>
 <div class="page-container">
 
-<h1>Simulação BB Capital de Giro - PREFIXADO</h1>
+<h1 id="tituloSimulacao">Simulação BB Capital de Giro - PRONAMPE</h1>
 
 <div class="dados-e-tabelas">
 <section class="dados-card">
@@ -174,11 +186,11 @@ tbody tr:hover { background:#eef3fb; }
 
     <div class="field">
         <label for="valor">Valor (R$)</label>
-        <input id="valor" type="number" min="0" step="0.01" value="429000">
+        <input id="valor" type="number" min="0" step="0.01" value="150000">
     </div>
 
     <div class="field">
-        <label for="dataLiberacao">Data Contratação</label>
+        <label for="dataLiberacao">Data Liberação</label>
         <input id="dataLiberacao" type="date">
     </div>
 
@@ -189,25 +201,27 @@ tbody tr:hover { background:#eef3fb; }
 
     <div class="field">
         <label for="carencia">Carência</label>
-        <input id="carencia" type="number" value="1">
+        <input id="carencia" type="number" value="6" readonly>
     </div>
 
     <div class="field">
         <label for="prazo">Prazo Total</label>
-        <input id="prazo" type="number" value="25">
+        <input id="prazo" type="number" value="48" readonly>
     </div>
 
-    <div id="sistemaContainer" class="field">
-        <label for="sistema">Sistema Reposição</label>
-        <select id="sistema">
-            <option value="sac">SAC</option>
-            <option value="price">PRICE</option>
-        </select>
+    <div id="fbaContainer" class="field">
+        <label for="fba">FBA (último exercício)</label>
+        <input id="fba" type="number" min="0" step="1" value="500000">
     </div>
 
-    <div id="taxaPrefixadoContainer" class="field">
-            <label for="pre">Taxa Mensal (%)</label>
-            <input id="pre" type="number" step="0.0001" value="3.48">
+    <div id="taxasCdiContainer" class="field">
+         <label for="cdi">TMS (%)</label>
+         <input id="cdi" type="number" step="0.0001" value="14.4">
+    </div>
+
+     <div id="sobretaxaContainer" class="field">
+         <label for="st">Sobretaxa (%)</label>
+         <input id="st" type="number" step="0.0001" readonly>
     </div>
 
     <div id="seguroContainer" class="field">
@@ -220,14 +234,6 @@ tbody tr:hover { background:#eef3fb; }
         <input id="socios" type="number" min="1" value="1">
     </div>
 
-    <div id="tipoSeguroContainer" class="field" style="display:none">
-        <label for="tipoSeguro">Tipo Seguro</label>
-        <select id="tipoSeguro">
-            <option value="parcelado">Parcelado</option>
-            <option value="integral">Integral</option>
-        </select>
-    </div>
-
     <div id="iofDiarioContainer" class="field">
         <label for="iofDiario">IOF Diário (%)</label>
         <input id="iofDiario" type="number" value="0.0082" step="0.0001" min="0">
@@ -238,70 +244,20 @@ tbody tr:hover { background:#eef3fb; }
         <input id="iofAdicional" type="number" value="0.38" step="0.0001" min="0">
     </div>
 
-    <div id="iofFinanciadoContainer" class="field">
-        <label for="iofFinanciado">IOF Financiado?</label>
-        <select id="iofFinanciado">
-            <option value="false">Não</option>
-            <option value="true">Sim</option>
-        </select>
     </div>
-
-    <div id="tipoTacContainer" class="field">
-        <label for="tipoTac">TAC</label>
-        <select id="tipoTac">
-            <option value="automatico">Automática</option>
-            <option value="manual">Manual</option>
-        </select>
-    </div>
-
-    <div id="tacManualContainer" class="field" style="display:none">
-        <label for="tacManual">TAC Manual (R$)</label>
-        <input id="tacManual" type="number" min="0" step="0.01" value="0">
-    </div>
-
-    <div id="flatUnidadeContainer" class="field">
-        <label for="flatUnidade">Unidade Flat</label>
-        <select id="flatUnidade">
-            <option value="real">Real R$</option>
-            <option value="percentual">Percentual %</option>
-        </select>
-    </div>
-
-    <div id="flatValorContainer" class="field">
-        <label for="flatValor">Valor Flat</label>
-        <input id="flatValor" type="number" min="0" step="0.01" value="0">
-    </div>
-
-    </div>
-    <div class="obs-note">Valor da Flat: R$ 100,00 ou 0,01% - 5,00%</div>
 </section>
 
 <div class="tabelas-laterais">
     <section class="table-card">
-        <h2 class="card-title">Regras FBA - Normal</h2>
+        <h2 class="card-title">Regras FBA Último Exercício</h2>
         <table class="mini-table">
             <thead>
-                <tr><th>FBA</th><th>CARÊNCIA</th><th>REPOSIÇÃO</th><th>SISTEMA</th></tr>
+                <tr><th>FBA</th><th>CARÊNCIA</th><th>PARCELAS</th><th>TOTAL</th></tr>
             </thead>
             <tbody>
-                <tr><td>< 360k</td><td>-</td><td>até 18</td><td>PRICE</td></tr>
-                <tr><td>360k - 1M</td><td>até 3</td><td>até 24</td><td>PRICE</td></tr>
-                <tr><td>1M - 5M</td><td>até 4</td><td>até 36</td><td>SAC/PRICE</td></tr>
-                <tr><td>> 5M</td><td>até 6</td><td>até 48</td><td>SAC</td></tr>
-            </tbody>
-        </table>
-    </section>
-    <section class="table-card">
-        <h2 class="card-title">Regras FBA - Convênio 186361</h2>
-        <table class="mini-table">
-            <thead>
-                <tr><th>FBA</th><th>CARÊNCIA</th><th>REPOSIÇÃO</th><th>SISTEMA</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>< 360k</td><td>até 3</td><td>até 24</td><td>PRICE</td></tr>
-                <tr><td>360k - 1M</td><td>até 4</td><td>até 36</td><td>PRICE</td></tr>
-                <tr><td>1M - 5M</td><td>até 6</td><td>até 48</td><td>PRICE</td></tr>
-                <tr><td>> 5M</td><td>até 9</td><td>até 60</td><td>SAC</td></tr>
+                <tr><td>< 360k</td><td>6</td><td>42</td><td>48</td></tr>
+                <tr><td>360k - 2,5M</td><td>6</td><td>42</td><td>48</td></tr>
+                <tr><td>2,5M - 4,8M</td><td>9</td><td>51</td><td>60</td></tr>
             </tbody>
         </table>
     </section>
@@ -309,14 +265,14 @@ tbody tr:hover { background:#eef3fb; }
         <h2 class="card-title">Impacto Limite Cliente</h2>
         <table class="mini-table">
             <tbody id="impactoLimiteCliente">
-                <tr><td>Fidejussória / Real</td><td>-</td></tr>
-                <tr><td>Total</td><td>-</td></tr>
+                <tr><td>Fundo de Aval Longo Prazo</td><td>-</td></tr>
+                <tr><td>Total Longo Prazo</td><td>-</td></tr>
             </tbody>
         </table>
     </section>
         <table class="mini-table">
             <tbody>
-                <tr><td>Desenvolvido por F3421879 - Guerreiro</td><td>v1.0</td></tr>
+                <tr><td>Sistema de Simulação Capital de Giro</td><td>v1.0</td></tr>
             </tbody>
         </table>
 </div>
@@ -333,7 +289,7 @@ tbody tr:hover { background:#eef3fb; }
 <table>
 <thead>
 <tr>
-<th>Posição</th><th>Data</th><th>Capital</th><th id="jurosHeader">Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
+<th>Posição</th><th>Data</th><th>Capital</th><th>Juros</th><th id="parcelaHeader">Parcela</th><th>Saldo Devedor</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
@@ -384,6 +340,7 @@ const feriados = [
 ];
 
 function parseDateLocal(value){
+    // Parse YYYY-MM-DD string to Date object in local time (no UTC offset)
     if(!value) return null;
     const parts = value.split('-');
     if(parts.length !== 3) return null;
@@ -395,6 +352,7 @@ function formatDateLocal(date){
 }
 
 function formatDateBR(value){
+    // Handle YYYY-MM-DD string directly to avoid timezone shift
     if(typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/)){
         const parts = value.split('-');
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -409,8 +367,31 @@ function formatReal(value){
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function ehUtil(data){
+    return data.getDay()!==0 && data.getDay()!==6 && !feriados.includes(formatDateLocal(data));
+}
+
+function proximoUtil(data){
+    let d = cloneDate(data);
+    while(!ehUtil(d)){
+        d.setDate(d.getDate()+1);
+    }
+    return d;
+}
+
 function cloneDate(d){
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function diasUteisNetworkdaysMenos1(d1, d2){
+    let count = 0;
+    let d = cloneDate(d1);
+    const end = cloneDate(d2);
+    while(d <= end){
+        if(ehUtil(d)) count++;
+        d.setDate(d.getDate()+1);
+    }
+    return Math.max(count - 1, 0);
 }
 
 function diasCorridos(d1, d2){
@@ -419,33 +400,8 @@ function diasCorridos(d1, d2){
     return Math.max(Math.floor((b-a)/(1000*60*60*24)),0);
 }
 
-function diasNoMes(ano, mes){
-    return new Date(ano, mes + 1, 0).getDate();
-}
-
-function computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, financedTotal, car, amortFinanceiro, d0){
-    let totalIof = 0;
-    let saldoIofCalc = valor + financedTotal;
-    let diasAcumuladosIofCalc = 0;
-    const iofShare = financedTotal / amortFinanceiro;
-
-    for(let i=0;i<datas.length;i++){
-        let data = datas[i];
-        let anterior = (i === 0) ? cloneDate(d0) : datas[i-1];
-        let dc = diasCorridos(anterior, data);
-        let principalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
-        let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIofCalc);
-        if(diasConsiderados > 0){
-            totalIof += saldoIofCalc * iofDiarioRate * diasConsiderados;
-            diasAcumuladosIofCalc += diasConsiderados;
-        }
-        if(i+1 > car){
-            saldoIofCalc -= principalParcela + iofShare;
-            if(saldoIofCalc < 0) saldoIofCalc = 0;
-        }
-    }
-
-    return totalIof;
+function taxaAnual(){
+    return (1 + (parseFloat(cdi.value) / 100)) * (1 + (parseFloat(st.value) / 100));
 }
 
 function calcularCetAnual(valorLiberado, fluxos){
@@ -490,11 +446,11 @@ function obterTaxaSeguro(dias){
     return faixa ? faixa.taxa : 0;
 }
 
-function atualizarImpactoLimite(valorContratado, diasTotais){
-    const periodo = diasTotais > 420 ? "Longo Prazo" : "Curto Prazo";
+function atualizarImpactoLimite(valorContratado){
+    // PRONAMPE: Impacto = valor contratado total (Fundo de Aval e Total = valor)
     impactoLimiteCliente.innerHTML = `
-        <tr><td>Fidejussória / Real ${periodo}</td><td>${formatReal(valorContratado)}</td></tr>
-        <tr><td>Total ${periodo}</td><td>${formatReal(valorContratado)}</td></tr>
+        <tr><td>Fundo de Aval Longo Prazo</td><td>${formatReal(valorContratado)}</td></tr>
+        <tr><td>Total Longo Prazo</td><td>${formatReal(valorContratado)}</td></tr>
     `;
 }
 
@@ -506,10 +462,6 @@ function calcular(){
     let base = parseInt(dataBaseInput.value);
     let usarSeguro = seguroSelect.checked;
     let numSocios = parseInt(sociosInput.value) || 1;
-    let sistema = sistemaSelect.value;
-    let taxaMensal = parseFloat(preInput.value) / 100;
-    let iofFinanciado = iofFinanciadoSelect.value === "true";
-    let seguroIntegral = usarSeguro && tipoSeguroSelect.value === "integral";
     let d0 = parseDateLocal(dataLiberacaoInput.value);
 
     if(!valor || !prazo || !d0 || isNaN(d0.getTime())){
@@ -517,82 +469,54 @@ function calcular(){
         return;
     }
 
-    if(!taxaMensal || taxaMensal <= 0){
-        alert("Informe a Taxa Mensal Prefixada.");
+    const fba = parseFloat(fbaInput.value) || 0;
+    if(fba > 4800000){
+        alert("FBA acima do valor máximo permitido na linha!");
         return;
     }
 
-    if(sistema === "price" && car < 1){
-        alert("Para PRICE, atribuir pelo menos 1 mês de carência.");
-        return;
-    }
+    let amort = prazo > car ? valor / (prazo - car) : 0;
 
-    let amortFinanceiro = prazo - car;
-    if(amortFinanceiro <= 0){
-        alert("Prazo deve ser maior que a carência.");
-        return;
-    }
-
-    // Cálculo da parcela PRICE constante
-    let parcelaPriceConst = 0;
-    if(sistema === "price"){
-        let q = 1 + taxaMensal;
-        let qn = Math.pow(q, amortFinanceiro);
-        if(qn > 1){
-            parcelaPriceConst = valor * (taxaMensal * qn) / (qn - 1);
-        } else {
-            parcelaPriceConst = valor / amortFinanceiro + valor * taxaMensal;
-        }
-    }
-
-    // TAC
-    let tacAutomatico = valor * 0.03;
-    if(tacAutomatico < 100) tacAutomatico = 100;
-    if(tacAutomatico > 5000) tacAutomatico = 5000;
-
-    const tacManual = parseFloat(tacManualInput.value);
-    const tac = tipoTacSelect.value === "manual" ? tacManual : tacAutomatico;
-
-    if(tipoTacSelect.value === "manual" && isNaN(tacManual)){
-        alert("Informe a TAC Manual - Pode ser zero.");
-        return;
-    }
-
-    // Comissão Flat
-    const flatUnidade = flatUnidadeSelect.value;
-    const flatValorInputValue = parseFloat(flatValorInput.value) || 0;
-    let comissaoFlat = 0;
-    if(flatUnidade === "real"){
-        comissaoFlat = flatValorInputValue;
-    } else {
-        comissaoFlat = valor * (flatValorInputValue / 100);
-    }
-
-    // IOF
-    const iofDiarioRate = parseFloat(iofDiarioInput.value || 0.0082) / 100;
-    const iofAdicionalRate = parseFloat(iofAdicionalInput.value || 0.38) / 100;
-    let totalIofDiario = 0;
-    let iofAdicionalTotal = valor * iofAdicionalRate;
-    let totalIOF = iofAdicionalTotal;
-    let totalIofFinanciado = 0;
-    let diasAcumuladosIOF = 0;
+    // Atualizar tabela de impacto
+    atualizarImpactoLimite(valor);
 
     // Gerar datas das parcelas
     let datas = [];
-    let d0Base = cloneDate(d0);
-
-    const firstMonthOffset = (sistema === "sac" && base < d0.getDate()) ? 2 : 1;
+    let anterior = cloneDate(d0);
 
     for(let i=1;i<=prazo;i++){
         let dt;
-        if(i === 1){
-            dt = cloneDate(d0Base);
-            dt.setMonth(d0Base.getMonth() + firstMonthOffset);
+        if(base >= 29){
+            dt = cloneDate(d0);
+            dt.setMonth(d0.getMonth() + i);
+            dt.setDate(1);
+            if(i === 1){
+                let diff = diasCorridos(d0, dt);
+                if(diff < 30){
+                    dt.setMonth(dt.getMonth() + 1);
+                }
+            }
+            dt = proximoUtil(dt);
         } else {
-            dt = cloneDate(datas[datas.length - 1]);
-            dt.setMonth(dt.getMonth() + 1);
+            dt = cloneDate(d0);
+            dt.setMonth(d0.getMonth() + i);
+            dt.setDate(base);
+            dt = proximoUtil(dt);
         }
-        dt.setDate(base);
+
+        if(datas.length > 0){
+            let ultima = datas[datas.length - 1];
+            if(dt <= ultima){
+                dt = cloneDate(ultima);
+                dt.setMonth(dt.getMonth() + 1);
+                if(base >= 29){
+                    dt.setDate(1);
+                } else {
+                    dt.setDate(base);
+                }
+                dt = proximoUtil(dt);
+            }
+        }
         datas.push(dt);
     }
 
@@ -601,7 +525,11 @@ function calcular(){
     let totalJuros = 0;
     let totalPago = 0;
     let fluxosParcelas = [];
-    let saldoDevedor = valor;
+
+    const iofDiarioRate = parseFloat(iofDiarioInput.value || 0.0082) / 100;
+    const iofAdicionalRate = parseFloat(iofAdicionalInput.value || 0.38) / 100;
+    let totalIOF = valor * iofAdicionalRate;
+    let diasAcumuladosIOF = 0;
 
     const diasTotaisOp = diasCorridos(d0, datas[datas.length - 1]);
     const taxaSeguroOp = obterTaxaSeguro(diasTotaisOp);
@@ -610,134 +538,33 @@ function calcular(){
         totalSeguroValor = numSocios * taxaSeguroOp * valor;
     }
     let numParcelasSeguro = prazo - 1;
-    let seguroParcela = (usarSeguro && !seguroIntegral && numParcelasSeguro > 0) ? totalSeguroValor / numParcelasSeguro : 0;
+    let seguroParcela = numParcelasSeguro > 0 ? totalSeguroValor / numParcelasSeguro : 0;
 
-    if(sistema === "sac" && iofFinanciado){
-        for(let iter = 0; iter < 50; iter++){
-            totalIofDiario = computeTotalIofDiarioFinanced(valor, datas, iofDiarioRate, totalIofFinanciado, car, amortFinanceiro, d0);
-            const nextTotalIofFinanciado = (totalIofDiario + valor * iofAdicionalRate) / (1 - iofAdicionalRate);
-            if(Math.abs(nextTotalIofFinanciado - totalIofFinanciado) < 0.01){
-                totalIofFinanciado = nextTotalIofFinanciado;
-                break;
-            }
-            totalIofFinanciado = nextTotalIofFinanciado;
-        }
-        totalIofDiario = Math.round(totalIofDiario * 100) / 100;
-        totalIofFinanciado = Math.round(totalIofFinanciado * 100) / 100;
-        iofAdicionalTotal = Math.round((totalIofFinanciado - totalIofDiario) * 100) / 100;
-        if(iofAdicionalTotal < 0) iofAdicionalTotal = 0;
-        totalIOF = iofAdicionalTotal;
-    }
-
-    const iofFinanciadoShare = (iofFinanciado && sistema === "sac") ? (totalIofDiario + iofAdicionalTotal) / amortFinanceiro : 0;
-    const usarPrincipalEstendido = (sistema === "sac" && base < diasNoMes(d0.getFullYear(), d0.getMonth()));
-
-    // PRICE: pre-calcular juros de amortização seguindo o modelo da planilha
-    let priceJurosReverso = [];
-    let priceCapitalReverso = [];
-    if(sistema === "price" && amortFinanceiro > 0){
-        let futurePrincipalSum = 0;
-        for(let idxAmort = amortFinanceiro - 1; idxAmort >= 0; idxAmort--){
-            let jurosP;
-            if(idxAmort === amortFinanceiro - 1){
-                jurosP = valor * taxaMensal;
-            } else {
-                const saldoAntes = valor - futurePrincipalSum;
-                jurosP = saldoAntes * taxaMensal;
-            }
-            let capitalP = parcelaPriceConst - jurosP;
-            if(capitalP < 0) capitalP = 0;
-            if(idxAmort === amortFinanceiro - 1){
-                const restante = valor - futurePrincipalSum;
-                if(capitalP > restante) capitalP = restante;
-            }
-            priceJurosReverso[idxAmort] = jurosP;
-            priceCapitalReverso[idxAmort] = capitalP;
-            futurePrincipalSum += capitalP;
-        }
-    }
+    let saldoDevedor = valor;
 
     for(let i=0;i<prazo;i++){
 
         let data = datas[i];
-        let anterior = (i === 0) ? cloneDate(d0) : datas[i-1];
+
+        let du = diasUteisNetworkdaysMenos1(anterior, data);
         let dc = diasCorridos(anterior, data);
 
-        let principalJuros = saldoDevedor;
-        if(i === 0 && usarPrincipalEstendido){
-            principalJuros += iofAdicionalTotal + tac + comissaoFlat;
-        }
+        let jurosPeriodo = saldoDevedor * ((taxaAnual() ** (du / 252)) - 1);
 
-        let jurosPeriodo, capitalParcela, parcelaTotal;
-
-        if(sistema === "sac"){
-            if(i === 0 && usarPrincipalEstendido){
-                const condDataBaseMesSeguinte = base < diasNoMes(d0.getFullYear(), d0.getMonth());
-                let dtSplit;
-                if(condDataBaseMesSeguinte){
-                    dtSplit = new Date(d0.getFullYear(), d0.getMonth() + 1, base);
-                } else {
-                    dtSplit = new Date(d0.getFullYear(), d0.getMonth(), base);
-                }
-                let firstSegmentDays = diasCorridos(d0, dtSplit);
-                let secondSegmentDays = diasCorridos(dtSplit, data);
-                let baseAmount = saldoDevedor + ((iofFinanciado && sistema === "sac") ? (totalIofDiario + iofAdicionalTotal) : 0);
-                let jurosPrimeiro = baseAmount * taxaMensal * (firstSegmentDays / 30);
-                let jurosSegundo = (baseAmount + jurosPrimeiro) * taxaMensal * (secondSegmentDays / 30);
-                jurosPeriodo = jurosPrimeiro + jurosSegundo;
-                capitalParcela = 0;
-                parcelaTotal = jurosPeriodo;
-            } else {
-                jurosPeriodo = principalJuros * taxaMensal * (dc / 30);
-                if(iofFinanciado && i+1 > car){
-                    jurosPeriodo += iofFinanciadoShare;
-                }
-                capitalParcela = (i+1 <= car) ? 0 : valor / amortFinanceiro;
-                parcelaTotal = jurosPeriodo + capitalParcela;
-            }
-        } else {
-            // PRICE invertido: capital decrescente, juros crescente
-            if(i+1 <= car){
-                jurosPeriodo = saldoDevedor * taxaMensal * (dc / 30);
-                capitalParcela = 0;
-                parcelaTotal = jurosPeriodo;
-            } else {
-                let idxAmort = i - car;
-                // Usa valores pré-calculados do PRICE invertido (reverso)
-                capitalParcela = priceCapitalReverso[idxAmort];
-                jurosPeriodo = priceJurosReverso[idxAmort];
-                parcelaTotal = capitalParcela + jurosPeriodo;
-            }
-        }
-
-        // IOF diário
         let iofPeriodo = 0;
-        if(!iofFinanciado || sistema !== "sac"){
-            let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIOF);
-            if(diasConsiderados > 0){
-                iofPeriodo = saldoDevedor * iofDiarioRate * diasConsiderados;
-                iofPeriodo = Math.round(iofPeriodo * 100) / 100;
-                totalIofDiario += iofPeriodo;
-                totalIOF += iofPeriodo;
-                diasAcumuladosIOF += diasConsiderados;
-            }
+        let diasConsiderados = Math.min(dc, 365 - diasAcumuladosIOF);
+        if(diasConsiderados > 0){
+            iofPeriodo = saldoDevedor * iofDiarioRate * diasConsiderados;
+            iofPeriodo = Math.round(iofPeriodo * 100) / 100;
+            totalIOF += iofPeriodo;
+            diasAcumuladosIOF += diasConsiderados;
         }
 
-    atualizarImpactoLimite(valor + totalIofFinanciado, diasTotaisOp);
+        let capitalParcela = (i+1 <= car) ? 0 : amort;
+        let seguroAtual = (usarSeguro && i < prazo - 2) ? seguroParcela : 0;
+        let parcelaTotal = jurosPeriodo + capitalParcela + seguroAtual;
 
-        // Seguro
-        let seguroAtual = (usarSeguro && !seguroIntegral && i < prazo - 2) ? seguroParcela : 0;
-        parcelaTotal += seguroAtual;
-
-        if(i === 0 && iofFinanciado && sistema === "sac"){
-            saldoDevedor = valor + totalIofDiario + iofAdicionalTotal;
-        }
-
-        if(sistema === "sac" && iofFinanciado && i+1 > car){
-            saldoDevedor -= capitalParcela + iofFinanciadoShare;
-        } else {
-            saldoDevedor -= capitalParcela;
-        }
+        saldoDevedor -= capitalParcela;
         if(saldoDevedor < 0.01) saldoDevedor = 0;
 
         fluxosParcelas.push({
@@ -757,38 +584,51 @@ function calcular(){
         <td>${formatReal(parcelaTotal)}</td>
         <td>${formatReal(saldoDevedor)}</td>
         </tr>`;
+
+        anterior = data;
     }
 
-    const totalIoFTotal = totalIofDiario + iofAdicionalTotal;
-    let despesaSeguro = usarSeguro ? (seguroIntegral ? totalSeguroValor : seguroParcela) : 0;
-    let despesaLiberacao = (iofFinanciado && sistema === "sac" ? 0 : totalIOF) + despesaSeguro + tac + comissaoFlat;
-    let totalFinal = totalPago + despesaLiberacao;
+    let despesaLiberacao = totalIOF + (usarSeguro ? seguroParcela : 0);
+    let totalFinal = totalPago + totalIOF;
 
     const valorLiberado = valor - despesaLiberacao;
     const cetAnual = calcularCetAnual(valorLiberado, fluxosParcelas);
     const cetMensal = cetAnual === null ? null : ((1 + cetAnual) ** (1 / 12)) - 1;
 
+    // NETWORKDAYS(01/MM/AAAA, ultimo_dia_mes/MM/AAAA) - 1 conforme planilha
+    const primeiroDiaMes = new Date(d0.getFullYear(), d0.getMonth(), 1);
+    const ultimoDiaMes = new Date(d0.getFullYear(), d0.getMonth() + 1, 0);
+    let duTaxa = diasUteisNetworkdaysMenos1(primeiroDiaMes, ultimoDiaMes);
+    if(duTaxa <= 0){
+        duTaxa = 1;
+    }
+    const taxaMensalAtual = (taxaAnual() ** (duTaxa / 252)) - 1;
+
     const textoCetMensal = cetMensal === null ? "N/A" : `${(cetMensal * 100).toFixed(2)}% a.m.`;
     const textoCetAnual = cetAnual === null ? "N/A" : `${(cetAnual * 100).toFixed(2)}% a.a.`;
-    const textoTaxaMensalAtual = `${(taxaMensal * 100).toFixed(2)}% a.m.`;
+    const textoTaxaMensalAtual = `${(taxaMensalAtual * 100).toFixed(2)}% a.m.`;
     const totalLiquido = valor - despesaLiberacao;
 
-    const textoLegendaParcela = usarSeguro ? "    ³Inclui valor da parcela do prestamista." : "";
+    const textoLegendaParcela = usarSeguro
+        ? "    ³Inclui valor da parcela do prestamista."
+        : "";
+
+    const observacaoPrestamista = usarSeguro ? " e Prestamista;" : ".";
 
     resumo.innerHTML = `
     <h3>Resumo</h3>
     <div class="resumo-grid">
         <div class="resumo-item"><span>Valor</span><span>${formatReal(valor)}</span></div>
         <div class="resumo-item"><span>Taxa Mensal¹</span><span>${textoTaxaMensalAtual}</span></div>
-        <div class="resumo-item"><span>Contratação</span><span>${formatDateBR(dataLiberacaoInput.value)}</span></div>
+        <div class="resumo-item"><span>Liberação</span><span>${formatDateBR(dataLiberacaoInput.value)}</span></div>
         <div class="resumo-item"><span>Data Base</span><span>${dataBaseInput.value}</span></div>
-        <div class="resumo-item"><span>Sistema</span><span>${sistema.toUpperCase()}</span></div>
+        <div class="resumo-item"><span>FBA</span><span>${formatReal(parseFloat(fbaInput.value) || 0)}</span></div>
         <div class="resumo-item"><span>Carência</span><span>${car}</span></div>
         <div class="resumo-item"><span>Prazo Total</span><span>${prazo}</span></div>
+        <div class="resumo-item"><span>Qtde Sócios</span><span>${numSocios}</span></div>
         <div class="resumo-item"><span>Seguro Total</span><span>${formatReal(totalSeguroValor)}</span></div>
-        <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroIntegral ? 0 : seguroParcela)}</span></div>
-        <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIoFTotal)}</span></div>
-        <div class="resumo-item"><span>TAC</span><span>${formatReal(tac)}</span></div>
+        <div class="resumo-item"><span>Seguro Parcela</span><span>${formatReal(seguroParcela)}</span></div>
+        <div class="resumo-item"><span>IOF Total</span><span>${formatReal(totalIOF)}</span></div>
         <div class="resumo-item"><span>Despesa Tot.²</span><span>${formatReal(despesaLiberacao)}</span></div>
         <div class="resumo-item"><span>CET Mensal</span><span>${textoCetMensal}</span></div>
         <div class="resumo-item"><span>CET Anual</span><span>${textoCetAnual}</span></div>
@@ -798,13 +638,13 @@ function calcular(){
     `;
 
     rodapeSimulacao.innerHTML = `
-    ¹Valor depende da quantidade de dias corridos entre as datas-base;<br>
-    ²Inclui valores de ${iofFinanciado ? "" : "IOF, "}Flat, Tarifa Abertura de Crédito (TAC)${usarSeguro ? " e Prestamista;" : "."}<br>
+    ¹Valor depende da quantidade de dias úteis entre as datas-base e TMS (${cdi.value}% a.a. atualmente);<br>
+    ²Inclui valores de IOF${observacaoPrestamista}<br>
 ${textoLegendaParcela}</p>
 
     <h3>OBSERVAÇÕES</h3>
     <p>A presente simulação não possui caráter de proposta financeira vinculante ou de estruturação de negócio.</p>
-    <p>As condições apresentadas, em especial a taxa de juros, o prazo e o valor das despesas, poderão ser alteradas sem aviso prévio.</p>
+    <p>As condições apresentadas, em especial a taxa de juros, o prazo e o valor das despesas, poderão ser alteradas sem aviso prévio. Valores sujeitos à variação da SELIC.</p>
     <p>Na simulação do cálculo do IOF foi considerada a alíquota padrão para operações com Pessoa Jurídica.</p>
     <p>O Valor apresentado para seguro prestamista é uma aproximação, podendo variar a depender da data de liberação e dia base das parcelas.</p>
     <p>As propostas de operações de crédito estão sujeitas a prévia análise e aprovação pelo Banco do Brasil.</p>
@@ -830,27 +670,19 @@ const prazoInput = document.getElementById("prazo");
 const carenciaInput = document.getElementById("carencia");
 const dataBaseInput = document.getElementById("dataBase");
 const dataLiberacaoInput = document.getElementById("dataLiberacao");
-const preInput = document.getElementById("pre");
+const cdi = document.getElementById("cdi");
+const st = document.getElementById("st");
+const fbaInput = document.getElementById("fba");
 const iofDiarioInput = document.getElementById("iofDiario");
 const iofAdicionalInput = document.getElementById("iofAdicional");
-const iofFinanciadoSelect = document.getElementById("iofFinanciado");
 const seguroSelect = document.getElementById("seguro");
 const sociosInput = document.getElementById("socios");
-const sociosContainer = document.getElementById("sociosContainer");
-const tipoSeguroSelect = document.getElementById("tipoSeguro");
-const tipoSeguroContainer = document.getElementById("tipoSeguroContainer");
-const jurosHeader = document.getElementById("jurosHeader");
-const sistemaSelect = document.getElementById("sistema");
-const tipoTacSelect = document.getElementById("tipoTac");
-const tacManualInput = document.getElementById("tacManual");
-const tacManualContainer = document.getElementById("tacManualContainer");
-const flatUnidadeSelect = document.getElementById("flatUnidade");
-const flatValorInput = document.getElementById("flatValor");
 const parcelaHeader = document.getElementById("parcelaHeader");
 const tabela = document.getElementById("tabela");
 const resumo = document.getElementById("resumo");
 const rodapeSimulacao = document.getElementById("rodapeSimulacao");
 const impactoLimiteCliente = document.getElementById("impactoLimiteCliente");
+const tituloSimulacao = document.getElementById("tituloSimulacao");
 const btnPrint = document.getElementById("btnPrint");
 
 let resultadosValidos = false;
@@ -874,24 +706,44 @@ function atualizarDataBase(){
     }
 }
 
-function atualizarSeguroOptions(){
+function atualizarTitulo(){
+    const fba = parseFloat(fbaInput.value) || 0;
+    const nomeProduto = fba <= 360000 ? "PROCRED 360" : "PRONAMPE";
+    tituloSimulacao.textContent = `Simulação BB Capital de Giro - ${nomeProduto}`;
+}
+
+function atualizarFbaDependencias(){
+    const fba = parseFloat(fbaInput.value) || 0;
+    let novaCarencia, novoPrazo, novaSobretaxa;
+
+    if(fba <= 360000){
+        novaCarencia = 6;
+        novoPrazo = 48;
+        novaSobretaxa = 5.0;
+    } else if(fba <= 2500000){
+        novaCarencia = 6;
+        novoPrazo = 48;
+        novaSobretaxa = 6.0;
+    } else if(fba <= 4800000){
+        novaCarencia = 9;
+        novoPrazo = 60;
+        novaSobretaxa = 6.0;
+    } else {
+        novaCarencia = 6;
+        novoPrazo = 48;
+        novaSobretaxa = 6.0;
+    }
+
+    carenciaInput.value = novaCarencia;
+    prazoInput.value = novoPrazo;
+    st.value = novaSobretaxa;
+    atualizarTitulo();
+}
+
+function atualizarSocios(){
     const usarSeguro = seguroSelect.checked;
     sociosContainer.style.display = usarSeguro ? "flex" : "none";
-    tipoSeguroContainer.style.display = usarSeguro ? "flex" : "none";
     parcelaHeader.textContent = usarSeguro ? "Parcela³" : "Parcela";
-}
-
-function atualizarJurosHeader(){
-    jurosHeader.textContent = iofFinanciadoSelect.value === "true" ? "Juros+IOF" : "Juros";
-}
-
-function atualizarTacManual(){
-    const usarManual = tipoTacSelect.value === "manual";
-    tacManualContainer.style.display = usarManual ? "block" : "none";
-}
-
-function atualizarIofFinanciado(){
-    iofFinanciadoContainer.style.display = sistemaSelect.value === "sac" ? "block" : "none";
 }
 
 function voltar(){
@@ -906,6 +758,10 @@ function bindResultsResetListeners(){
     });
 }
 
+function avisoParametroFBA(){
+    alert("Para alterar este parâmetro, mude o FBA do último exercício!");
+}
+
 const printDateSpan = document.getElementById("printDate");
 function atualizarCabecalhoImpressao(){
     if(printDateSpan){
@@ -913,22 +769,22 @@ function atualizarCabecalhoImpressao(){
     }
 }
 
+// Add warning to readonly FBA-dependent fields
+carenciaInput.addEventListener("click", avisoParametroFBA);
+prazoInput.addEventListener("click", avisoParametroFBA);
+st.addEventListener("click", avisoParametroFBA);
+
 inicializarDatas();
 atualizarDataBase();
+atualizarFbaDependencias();
 dataLiberacaoInput.addEventListener("input", () => { atualizarDataBase(); resetarResultados(); });
-seguroSelect.addEventListener("change", () => { atualizarSeguroOptions(); resetarResultados(); });
-tipoSeguroSelect.addEventListener("change", resetarResultados);
-iofFinanciadoSelect.addEventListener("change", () => { atualizarJurosHeader(); resetarResultados(); });
-tipoTacSelect.addEventListener("change", atualizarTacManual);
-sistemaSelect.addEventListener("change", () => { atualizarIofFinanciado(); resetarResultados(); });
+fbaInput.addEventListener("input", () => { atualizarFbaDependencias(); resetarResultados(); });
+seguroSelect.addEventListener("change", atualizarSocios);
 atualizarCabecalhoImpressao();
 bindResultsResetListeners();
 window.onbeforeprint = atualizarCabecalhoImpressao;
 if(btnPrint) btnPrint.disabled = true;
-atualizarSeguroOptions();
-atualizarJurosHeader();
-atualizarTacManual();
-atualizarIofFinanciado();
+atualizarSocios();
 
 </script>
 
